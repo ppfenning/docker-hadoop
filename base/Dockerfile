@@ -15,4 +15,5 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 
 ADD *.sh /
 RUN chmod a+x /*.sh
-ENTRYPOINT ["/install-hadoop.sh", "/entrypoint.sh"]
+RUN ["/install-hadoop.sh"]
+ENTRYPOINT ["/entrypoint.sh"]

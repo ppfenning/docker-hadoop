@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: ppfenning/hadoop-namenode
+    image: ppfenning/hadoop-namenode:big-data
     container_name: namenode
     restart: always
     ports:
@@ -11,12 +11,12 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     environment:
-      - CLUSTER_NAME=big_data
+      - CLUSTER_NAME=big-data
     env_file:
       - ./hadoop.env
 
   datanode0:
-    image: ppfenning/hadoop-datanode
+    image: ppfenning/hadoop-datanode:big-data
     container_name: datanode0
     restart: always
     depends_on: [namenode]
@@ -28,7 +28,7 @@ services:
       - ./hadoop.env
 
   datanode1:
-    image: ppfenning/hadoop-datanode
+    image: ppfenning/hadoop-datanode:big-data
     container_name: datanode1
     restart: always
     depends_on: [namenode]

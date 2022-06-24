@@ -1,4 +1,4 @@
-FROM ppfenning/hadoop-base
+FROM ppfenning/hadoop-base:big-data
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 

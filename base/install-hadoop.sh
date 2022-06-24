@@ -1,5 +1,5 @@
 #!/bin/bash
-HADOOP_VERSION=3.3.0
+HADOOP_VERSION=3.3.3
 HADOOP_URL="https://www.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"
 
 curl -fSL "${HADOOP_URL}" -o /tmp/hadoop.tar.gz

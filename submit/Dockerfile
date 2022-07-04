@@ -1,6 +1,6 @@
-FROM ppfenning/hadoop-base:big-data
+FROM bde2020/hadoop-base:2.0.0-hadoop3.2.1-java8
 
-MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
+MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
 
 COPY WordCount.jar /opt/hadoop/applications/WordCount.jar
 

@@ -15,29 +15,24 @@ services:
     env_file:
       - hadoop.env
 
-  datanode1:
+  datanode:
+    depends_on:
+      - namenode
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode1
+    container_name: datanode
     restart: always
     volumes:
-      - hadoop_datanode1:/hadoop/dfs/data
+      - hadoop_datanode:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
+      DATA_PORT: "9865"
     env_file:
       - hadoop.env
 
-  datanode2:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode2
-    restart: always
-    volumes:
-      - hadoop_datanode2:/hadoop/dfs/data
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870"
-    env_file:
-      - hadoop.env
   
   resourcemanager:
+    depends_on:
+      - datanode
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
     container_name: resourcemanager
     restart: always
@@ -46,7 +41,9 @@ services:
     env_file:
       - hadoop.env
 
-  nodemanager1:
+  nodemanager:
+    depends_on:
+      - resourcemanager
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
     container_name: nodemanager
     restart: always
@@ -56,6 +53,8 @@ services:
       - hadoop.env
   
   historyserver:
+    depends_on:
+      - resourcemanager
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
     container_name: historyserver
     restart: always
@@ -68,6 +67,5 @@ services:
   
 volumes:
   hadoop_namenode:
-  hadoop_datanode1:
-  hadoop_datanode2:
+  hadoop_datanode:
   hadoop_historyserver:

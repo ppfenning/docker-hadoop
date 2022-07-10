@@ -102,15 +102,15 @@ function wait_for_it()
       let "i++"
       sleep $retry_seconds
 
-      nc -z $service $port
+      nc -z "$service" "$port"
       result=$?
     done
     echo "[$i/$max_try] $service:${port} is available."
 }
 
-for i in ${SERVICE_PRECONDITION[@]}
+for i in "${SERVICE_PRECONDITION[@]}"
 do
-    wait_for_it ${i}
+    wait_for_it "${i}"
 done
 
-exec $@
+exec "$@"

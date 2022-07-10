@@ -1,6 +1,6 @@
-FROM bde2020/hadoop-base:2.0.0-hadoop3.2.1-java8
+FROM ppfenning/hadoop-base:master
 
-MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
+MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
 HEALTHCHECK CMD curl -f http://localhost:9870/ || exit 1
 

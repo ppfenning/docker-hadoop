@@ -24,7 +24,6 @@ To deploy an example HDFS cluster, run:
 Run example wordcount job:
 ```
   make wordcount
-```tack deploy -c docker-compose-v3.yml hadoop
 ```
 
 `docker-compose` creates a docker network that can be found by running `docker network list`, e.g. `dockerhadoop_default`.

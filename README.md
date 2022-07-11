@@ -63,4 +63,4 @@ The available configurations are:
 
 If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
 
-#### Note: This has been adapted from Big Data Europe's docker image
+### Note: This has been forked from Big Data Europe's docker image. Thank you to all contributors!

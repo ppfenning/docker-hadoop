@@ -8,13 +8,3 @@ build:
 	docker build -t ppfenning/hadoop-resourcemanager:$(current_branch) ./resourcemanager
 	docker build -t ppfenning/hadoop-nodemanager:$(current_branch) ./nodemanager
 	docker build -t ppfenning/hadoop-historyserver:$(current_branch) ./historyserver
-	docker build -t ppfenning/hadoop-submit:$(current_branch) ./submit
-
-wordcount:
-	docker build -t hadoop-wordcount ./submit
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -mkdir -p /input/
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -copyFromLocal -f /opt/hadoop-3.2.3/README.txt /input/
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} hadoop-wordcount
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -cat /output/*
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -rm -r /output
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -rm -r /input

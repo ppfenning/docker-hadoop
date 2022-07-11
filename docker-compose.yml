@@ -39,7 +39,7 @@ services:
       - hadoop_datanode2:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
-      DATA_PORT: "9865"
+      DATA_PORT: "9866"
     env_file:
       - hadoop.env
 

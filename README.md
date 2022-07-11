@@ -1,11 +1,16 @@
 # Hadoop Docker
 
+## Clone this repo with the below command
+
+`git clone https://github.com/ppfenning/docker-hadoop.git`
+
 ## Supported Hadoop Versions
 See repository branches for supported hadoop versions (using 3.2.3)
 
 ## Pre-requisites
 
-Install Docker using https://docs.docker.com/engine/install/
+Git: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+Docker: https://docs.docker.com/engine/install/
 
 
 ## Quick Start

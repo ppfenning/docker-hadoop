@@ -1,29 +1,25 @@
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
-
-# Changes
-
-Version 2.0.0 introduces uses wait_for_it script for the cluster startup
-
 # Hadoop Docker
 
 ## Supported Hadoop Versions
-See repository branches for supported hadoop versions
+See repository branches for supported hadoop versions (using 3.2.3)
+
+## Pre-requisites
+
+Install Docker using https://docs.docker.com/engine/install/
+
 
 ## Quick Start
 
 To deploy an example HDFS cluster, run:
 ```
-  docker-compose up
+  docker-compose up 
+  # docker-compose up -d (if background run is desired)
 ```
 
 Run example wordcount job:
 ```
   make wordcount
-```
-
-Or deploy in swarm:
-```
-docker stack deploy -c docker-compose-v3.yml hadoop
+```tack deploy -c docker-compose-v3.yml hadoop
 ```
 
 `docker-compose` creates a docker network that can be found by running `docker network list`, e.g. `dockerhadoop_default`.
@@ -32,7 +28,7 @@ Run `docker network inspect` on the network (e.g. `dockerhadoop_default`) to fin
 
 * Namenode: http://<dockerhadoop_IP_address>:9870/dfshealth.html#tab-overview
 * History server: http://<dockerhadoop_IP_address>:8188/applicationhistory
-* Datanode: http://<dockerhadoop_IP_address>:9864/
+* Datanode(s): http://<dockerhadoop_IP_address>:$DATA_PORT/
 * Nodemanager: http://<dockerhadoop_IP_address>:8042/node
 * Resource manager: http://<dockerhadoop_IP_address>:8088/
 
@@ -61,3 +57,5 @@ The available configurations are:
 * /etc/hadoop/mapred-site.xml  MAPRED_CONF
 
 If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
+
+#### Note: This has been adapted from Big Data Europe's docker image

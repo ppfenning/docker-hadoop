@@ -6,3 +6,4 @@ docker image push ppfenning/hadoop-datanode:$current_branch
 docker image push ppfenning/hadoop-nodemanager:$current_branch
 docker image push ppfenning/hadoop-resourcemanager:$current_branch
 docker image push ppfenning/hadoop-historyserver:$current_branch
+docker image push ppfenning/hadoop-submit:$current_branch

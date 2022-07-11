@@ -10,6 +10,7 @@ See repository branches for supported hadoop versions (using 3.2.3)
 ## Pre-requisites
 
 Git: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+
 Docker: https://docs.docker.com/engine/install/
 
 

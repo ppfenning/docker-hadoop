@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM ubuntu:latest
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
@@ -26,23 +26,7 @@ ENV HADOOP_HOME=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV MULTIHOMED_NETWORK=1
 ENV USER=root
-ENV PATH=$HADOOP_HOME/bin/:$PATH
-
-# install Pig
-ENV PIG_VERSION 0.17.0
-ENV PIG_URL https://downloads.apache.org/pig/pig-$PIG_VERSION/pig-$PIG_VERSION.tar.gz
-
-# get scripts in folder
-ADD InstallPig.sh /InstallPig.sh
-# make executable
-RUN chmod a+x /InstallPig.sh
-# run
-RUN ["/InstallPig.sh"]
-
-ENV PIG_HOME=/usr/lib/pig/pig-$PIG_VERSION
-ENV PIG_CONF_DIR=$PIG_HOME/conf
-ENV PIG_CLASSPATH=$PIG_CONF_DIR
-ENV PATH=$PIG_HOME/bin:$PATH
+ENV PATH=$HADOOP_HOME/bin:$PATH
 
 # get scripts in folder
 ADD entrypoint.sh /entrypoint.sh

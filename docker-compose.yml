@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: ppfenning/hadoop-namenode:master
+    image: ppfenning/big-data-crime-stats:master
     container_name: namenode
     restart: always
     ports:

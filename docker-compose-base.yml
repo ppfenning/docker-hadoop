@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  namenode:
+    build:
+      context: base
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-base:${TAG}"
+    env_file:
+      - hadoop.env

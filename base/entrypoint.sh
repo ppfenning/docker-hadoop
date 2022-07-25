@@ -12,6 +12,7 @@ function addProperty() {
   local escapedEntry=$(echo $entry | sed 's/\//\\\//g')
   sed -i "/<\/configuration>/ s/.*/${escapedEntry}\n&/" $path
 }
+export -f addProperty
 
 function configure() {
     local path=$1
@@ -30,6 +31,7 @@ function configure() {
         addProperty $path $name "$value"
     done
 }
+export -f configure
 
 configure /etc/hadoop/core-site.xml core CORE_CONF
 configure /etc/hadoop/hdfs-site.xml hdfs HDFS_CONF

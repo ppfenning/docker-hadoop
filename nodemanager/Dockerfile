@@ -1,6 +1,6 @@
-FROM ppfenning/hadoop-base:master
+FROM localhost:5000/final-project-base:latest
 
-MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
+MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
 HEALTHCHECK CMD curl -f http://localhost:8042/ || exit 1
 

@@ -2,7 +2,7 @@
 
 ## Clone this repo with the below command
 
-`git clone https://github.com/ppfenning/docker-hadoop.git`
+`git clone https://github.com/docker-hadoop.git`
 
 ## Supported Hadoop Versions
 See repository branches for supported hadoop versions (using 3.2.3)

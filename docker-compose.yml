@@ -2,7 +2,9 @@ version: "3"
 
 services:
   namenode:
-    image: ppfenning/big-data-crime-stats:master
+    build:
+      context: namenode
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-namenode:${TAG}"
     container_name: namenode
     restart: always
     ports:
@@ -11,42 +13,32 @@ services:
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     environment:
-      - CLUSTER_NAME=big-data
+      CLUSTER_NAME: big-data
     env_file:
       - hadoop.env
 
   datanode:
+    build:
+      context: datanode
     depends_on:
       - namenode
-    image: ppfenning/hadoop-datanode:master
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-datanode:${TAG}"
     container_name: datanode
     restart: always
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
+      - hadoop_datanode:/hadoop/dfs/datanode
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
       DATA_PORT: "9865"
     env_file:
       - hadoop.env
-
-  datanode2:
-    depends_on:
-      - namenode
-    image: ppfenning/hadoop-datanode:master
-    container_name: datanode2
-    restart: always
-    volumes:
-      - hadoop_datanode2:/hadoop/dfs/data
-    environment:
-      SERVICE_PRECONDITION: "namenode:9870"
-      DATA_PORT: "9866"
-    env_file:
-      - hadoop.env
   
   resourcemanager:
+    build:
+      context: resourcemanager
     depends_on:
       - datanode
-    image: ppfenning/hadoop-resourcemanager:master
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-resourcemanager:${TAG}"
     container_name: resourcemanager
     restart: always
     environment:
@@ -55,9 +47,11 @@ services:
       - hadoop.env
 
   nodemanager:
+    build:
+      context: nodemanager
     depends_on:
       - resourcemanager
-    image: ppfenning/hadoop-nodemanager:master
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-nodemanager:${TAG}"
     container_name: nodemanager
     restart: always
     environment:
@@ -66,9 +60,11 @@ services:
       - hadoop.env
   
   historyserver:
+    build:
+      context: historyserver
     depends_on:
       - resourcemanager
-    image: ppfenning/hadoop-historyserver:master
+    image: "${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}-historyserver:${TAG}"
     container_name: historyserver
     restart: always
     environment:
@@ -81,5 +77,4 @@ services:
 volumes:
   hadoop_namenode:
   hadoop_datanode:
-  hadoop_datanode2:
   hadoop_historyserver:

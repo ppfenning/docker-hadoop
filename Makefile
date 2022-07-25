@@ -1,22 +1,30 @@
-DOCKER_NETWORK = docker-hadoop_default
+ifndef TAG
+$(error The TAG variable is missing.)
+endif
+
+ifndef ENV
+$(error The ENV variable is missing.)
+endif
+
+ifeq (,$(filter $(ENV),test dev))
+COMPOSE_FILE_PATH := -f docker-compose.yml
+endif
+
+DOCKER_NETWORK = final-project_default
 ENV_FILE = hadoop.env
-current_branch := $(shell git rev-parse --abbrev-ref HEAD)
-KAGGLE_TOKEN=$(shell cat ~/.kaggle/kaggle.json)
-build:
-	docker build -t ppfenning/hadoop-base:$(current_branch) ./base
-	docker build -t ppfenning/hadoop-namenode:$(current_branch) ./namenode
-	docker build -t ppfenning/hadoop-datanode:$(current_branch) ./datanode
-	docker build -t ppfenning/hadoop-resourcemanager:$(current_branch) ./resourcemanager
-	docker build -t ppfenning/hadoop-nodemanager:$(current_branch) ./nodemanager
-	docker build -t ppfenning/hadoop-historyserver:$(current_branch) ./historyserver
-	docker build -t ppfenning/big-data-crime-stats:$(current_branch) ./crime-stats
 
-wordcount:
-	docker build -t hadoop-wordcount ./submit
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -mkdir -p /input/
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -copyFromLocal -f /opt/hadoop-3.2.3/README.txt /input/
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} hadoop-wordcount
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -cat /output/*
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -rm -r /output
-	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} ppfenning/hadoop-base:$(current_branch) hdfs dfs -rm -r /input
+base-create:
+	docker build -t "pfenning/final-project-base:${TAG}" ./base
+	docker tag "pfenning/final-project-base:${TAG}" "localhost:5000/final-project-base:${TAG}"
 
+install-pig:
+	docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FILE} "localhost:5000/final-project-base:${TAG}" hdfs dfs -mkdir -p /input/
+
+build: base-create
+	docker-compose build --no-cache
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down

@@ -15,7 +15,7 @@ services:
     environment:
       CLUSTER_NAME: big-data
     env_file:
-      - hadoop.env
+      - .envfold/hadoop.env
 
   datanode:
     build:
@@ -29,9 +29,9 @@ services:
       - hadoop_datanode:/hadoop/dfs/datanode
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
-      DATA_PORT: "9865"
+      DATA_PORT: "9864"
     env_file:
-      - hadoop.env
+      - .envfold/hadoop.env
   
   resourcemanager:
     build:
@@ -44,7 +44,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "datanode:9864"
     env_file:
-      - hadoop.env
+      - .envfold/hadoop.env
 
   nodemanager:
     build:
@@ -57,7 +57,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "resourcemanager:8088"
     env_file:
-      - hadoop.env
+      - .envfold/hadoop.env
   
   historyserver:
     build:
@@ -72,7 +72,7 @@ services:
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
-      - hadoop.env
+      - .envfold/hadoop.env
   
 volumes:
   hadoop_namenode:

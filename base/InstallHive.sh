@@ -5,7 +5,6 @@ curl -fSL "$HIVE_URL" -o /tmp/hive-"$HIVE_VERSION".tar.gz
 mkdir /usr/lib/hive/
 tar -xvf /tmp/hive-"$HIVE_VERSION".tar.gz -C /usr/lib/hive/
 rm /tmp/hive-"$HIVE_VERSION".tar.gz
-export PATH=$PATH:$HIVE_HOME/bin
 
 # hdfs stuff
 hdfs dfs -mkdir /tmp

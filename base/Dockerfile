@@ -1,13 +1,14 @@
-FROM ubuntu:latest
+FROM ubuntu
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
+# get scripts in folder
+ADD *.sh /
+# make executable
+RUN chmod a+x /*.sh
+
 # Install Java
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
-# get scripts in folder
-ADD InstallJava8.sh /InstallJava8.sh
-# make executable
-RUN chmod a+x /InstallJava8.sh
 # run
 RUN ["/InstallJava8.sh"]
 
@@ -26,7 +27,8 @@ ENV HADOOP_HOME=/opt/hadoop-$HADOOP_VERSION
 ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV MULTIHOMED_NETWORK=1
 ENV USER=root
-ENV PATH=$HADOOP_HOME/bin:$PATH
+ENV PATH=$HADOOP_HOME/bin/:$PATH
+ENV BASE_URL=https://dlcdn.apache.org/
 
 # get scripts in folder
 ADD entrypoint.sh /entrypoint.sh

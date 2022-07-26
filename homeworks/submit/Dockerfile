@@ -1,4 +1,4 @@
-FROM hadoop-base
+FROM localhost:5000/final-project-base:latest
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 

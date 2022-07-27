@@ -27,7 +27,7 @@ function configure() {
         var="${envPrefix}_${c}"
         value=${!var}
         echo " - Setting $name=$value"
-        addProperty "$path" "$name" "$value"
+        addProperty $path $name "$value"
     done
 }
 
@@ -88,13 +88,13 @@ function wait_for_it()
     local max_try=100
     (( i=1 ))
 
-    nc -z "$service" "$port"
+    nc -z $service $port
     result=$?
 
     until [ $result -eq 0 ]; do
       echo "[$i/$max_try] check for ${service}:${port}..."
       echo "[$i/$max_try] ${service}:${port} is not available yet"
-      if (( "$i" == "$max_try" )); then
+      if (( $i == $max_try )); then
         echo "[$i/$max_try] ${service}:${port} is still not available; giving up after ${max_try} tries. :/"
         exit 1
       fi

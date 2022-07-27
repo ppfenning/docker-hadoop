@@ -16,10 +16,9 @@ else
 	IMAGE_FAMILY = localhost:5000/${COMPOSE_PROJECT_NAME}
 endif
 
-start: down build up
+start: build up
 
-build: base-build node-build manager-build
-
+build: down base-build node-build manager-build extras-build
 
 base-build:
 	docker build -t ${IMAGE_FAMILY}-base:${TAG} ./base
@@ -56,10 +55,11 @@ add-workers: init-up
 		docker-compose up -d --scale datanode=$$number; \
 		((number = number + 1)) ; \
     done
+
 up: add-workers ${EXTRAS}
 
 # stop running containers, keeping networks and volumes intact
-stop:
+stop: kill-extras
 	docker-compose stop
 # restart composed containers
 restart:
@@ -74,17 +74,26 @@ pig-kill:
 	@./scripts/rm-container.sh pignode
 pig-build:
 	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-pig:${TAG} --label pignode ./pig-install
-pig: pig-kill pig-build
+ifeq ($(BUILD),release)
+	docker image push ${IMAGE_FAMILY}-pig:${TAG}
+endif
+pig: pig-kill
 	docker run -it -d --name pignode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-pig:${TAG} bash
 
 hive-kill:
 	@./scripts/rm-container.sh hivenode
 hive-build:
 	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-hive:${TAG} --label hivenode ./hive-install
-hive: hive-kill hive-build
+ifeq ($(BUILD),release)
+	docker image push ${IMAGE_FAMILY}-hive:${TAG}
+endif
+hive: hive-kill
 	docker run -it -d --name hivenode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-hive:${TAG} hive
-spark:
-	docker cp extras/InstallSpark.sh ${IMAGE_FAMILY}-namenode:${TAG}
+
+extras-build: pig-build hive-build
+
+save:
+	./scripts/image-saves.sh
 
 wordcount:
 	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount | tee >/dev/null

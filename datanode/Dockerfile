@@ -1,4 +1,5 @@
-FROM localhost:5000/final-project-base:latest
+ARG IMAGE_NAME=ppfenning/hadoop-base:master
+FROM ${IMAGE_NAME}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
@@ -11,6 +12,6 @@ VOLUME /hadoop/dfs/data
 ADD run.sh /run.sh
 RUN chmod a+x /run.sh
 
-EXPOSE ${DATA_PORT}
+EXPOSE 9864
 
 CMD ["/run.sh"]

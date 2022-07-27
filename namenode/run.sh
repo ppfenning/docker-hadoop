@@ -20,4 +20,3 @@ if [ "`ls -A $namedir`" == "" ]; then
 fi
 
 $HADOOP_HOME/bin/hdfs --config $HADOOP_CONF_DIR namenode
-hdfs dfsadmin -safemode leave

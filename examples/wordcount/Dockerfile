@@ -1,4 +1,5 @@
-FROM localhost:5000/final-project-base:latest
+ARG IMAGE_NAME=ppfenning/hadoop-base:master
+FROM ${IMAGE_NAME}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 

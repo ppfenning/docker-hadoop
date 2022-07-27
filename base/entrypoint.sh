@@ -9,8 +9,8 @@ function addProperty() {
   local value=$3
 
   local entry="<property><name>$name</name><value>${value}</value></property>"
-  local escapedEntry=$(echo $entry | sed 's/\//\\\//g')
-  sed -i "/<\/configuration>/ s/.*/${escapedEntry}\n&/" $path
+  local escapedEntry=$(echo "$entry" | sed 's/\//\\\//g')
+  sed -i "/<\/configuration>/ s/.*/${escapedEntry}\n&/" "$path"
 }
 
 function configure() {

@@ -1,6 +1,8 @@
 include .env
 export
 
+$(shell chmod a+x scripts/*)
+
 ifeq (,$(filter $(ENV),test dev))
 COMPOSE_FILE_PATH := -f docker-compose.yml
 endif
@@ -14,9 +16,10 @@ else
 	IMAGE_FAMILY = localhost:5000/${COMPOSE_PROJECT_NAME}
 endif
 
+start: down build up
+
 build: base-build node-build manager-build
 
-build-up: build up
 
 base-build:
 	docker build -t ${IMAGE_FAMILY}-base:${TAG} ./base
@@ -43,15 +46,18 @@ ifeq ($(BUILD),release)
 endif
 
 # build volumes, network, and start container
-up:
+init-up:
 	# initialize base network
 	docker-compose up -d
+add-workers: init-up
 	# add datanodes until worker limit is met
 	# this is done in a b/c parallel scaling is broken in v2
 	number=2 ; while [[ $$number -le ${WORKERS} ]] ; do \
 		docker-compose up -d --scale datanode=$$number; \
 		((number = number + 1)) ; \
     done
+up: add-workers ${EXTRAS}
+
 # stop running containers, keeping networks and volumes intact
 stop:
 	docker-compose stop
@@ -59,17 +65,26 @@ stop:
 restart:
 	docker-compose restart
 # tear down compose, delete all volumes and networks
-down:
+down: kill-extras
 	docker-compose down -v --remove-orphans
 
-pig:
-	@echo pig
+kill-extras: pig-kill hive-kill
 
-hive:
-	@echo hive
+pig-kill:
+	@./scripts/rm-container.sh pignode
+pig-build:
+	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-pig:${TAG} --label pignode ./pig-install
+pig: pig-kill pig-build
+	docker run -it -d --name pignode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-pig:${TAG} bash
 
+hive-kill:
+	@./scripts/rm-container.sh hivenode
+hive-build:
+	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-hive:${TAG} --label hivenode ./hive-install
+hive: hive-kill hive-build
+	docker run -it -d --name hivenode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-hive:${TAG} hive
 spark:
-	@echo spark
+	docker cp extras/InstallSpark.sh ${IMAGE_FAMILY}-namenode:${TAG}
 
 wordcount:
 	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount | tee >/dev/null
@@ -79,4 +94,3 @@ wordcount:
 	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -cat /output/*
 	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -rm -r /output | tee >/dev/null
 	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -rm -r /input | tee >/dev/null
-

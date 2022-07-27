@@ -95,11 +95,17 @@ extras-build: pig-build hive-build
 save:
 	./scripts/image-saves.sh
 
+insert-crimes:
+	./scripts/get_crime_data.sh
+
+pig-crimes: insert-crimes pig
+	docker cp examples/pig/run.pig pignode:/run.pig
+	docker exec pignode hdfs dfs -ls /data
+
 wordcount:
 	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount | tee >/dev/null
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -mkdir -p /input/ | tee >/dev/null
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -copyFromLocal -f /opt/hadoop-3.2.3/README.txt /input/ | tee >/dev/null
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${COMPOSE_PROJECT_NAME}-wordcount | tee >/dev/null
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -cat /output/*
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -rm -r /output | tee >/dev/null
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-base:${TAG} hdfs dfs -rm -r /input | tee >/dev/null
+	@docker exec namenode hdfs dfs -mkdir -p /input/
+	@docker exec namenode hadoop fs -put -f /opt/hadoop-3.2.3/README.txt /input/
+	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${COMPOSE_PROJECT_NAME}-wordcount
+	@docker exec namenode hdfs dfs -cat /output/*
+	@docker exec namenode hdfs dfs -rm -r /output /input

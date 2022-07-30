@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  namenode:
+    image: "${IMAGE_FAMILY}-namenode:${TAG}"
+    container_name: namenode
+    restart: always
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      CLUSTER_NAME: big-data
+    env_file:
+      - ../config/hadoop.env
+  
+volumes:
+  hadoop_namenode:

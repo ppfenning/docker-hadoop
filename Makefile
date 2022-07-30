@@ -1,13 +1,15 @@
-include .env
+include config/.env.base
+export
+
+ifndef ENV
+$(error The ENV variable is missing.)
+endif
+
+include config/.env.${ENV}
 export
 
 $(shell chmod a+x scripts/*)
 
-ifeq (,$(filter $(ENV),test dev))
-COMPOSE_FILE_PATH := -f docker-compose.yml
-endif
-
-ENV_FOLD = .envfold
 DOCKER_NETWORK = ${COMPOSE_PROJECT_NAME}_default
 
 ifeq ($(BUILD),release)
@@ -18,79 +20,77 @@ endif
 
 start: build up
 
-build: down base-build node-build manager-build extras-build
+build: down build-base build-extras build-nodes build-managers
 
-base-build:
+build-base:
 	docker build -t ${IMAGE_FAMILY}-base:${TAG} ./base
 ifeq ($(BUILD),release)
 	docker push ${IMAGE_FAMILY}-base:${TAG}
 endif
 
-node-build:
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-namenode:${TAG} ./namenode
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-datanode:${TAG} ./datanode
+build-extras:
+	docker build --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} --build-arg TAG=${TAG} -t ${IMAGE_FAMILY}-extras:${TAG} ./extras
 ifeq ($(BUILD),release)
-	docker image push ${IMAGE_FAMILY}-namenode:${TAG} && \
-	docker image push ${IMAGE_FAMILY}-datanode:${TAG}
+	docker push ${IMAGE_FAMILY}-extras:${TAG}
 endif
 
-manager-build:
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-resourcemanager:${TAG} ./resourcemanager
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-nodemanager:${TAG} ./nodemanager
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-historyserver:${TAG} ./historyserver
-ifeq ($(BUILD),release)
-	docker image push ${IMAGE_FAMILY}-nodemanager:${TAG} && \
-	docker image push ${IMAGE_FAMILY}-resourcemanager:${TAG} && \
-	docker image push ${IMAGE_FAMILY}-historyserver:${TAG}
-endif
+build-namenode:
+	./scripts/build-node.sh namenode
 
-# build volumes, network, and start container
-init-up:
-	# initialize base network
-	docker-compose up -d
-add-workers: init-up
-	# add datanodes until worker limit is met
-	# this is done in a b/c parallel scaling is broken in v2
-	number=2 ; while [[ $$number -le ${WORKERS} ]] ; do \
-		docker-compose up -d --scale datanode=$$number; \
+build-datanode:
+	./scripts/build-node.sh datanode
+
+build-resourcemanager:
+	./scripts/build-node.sh resourcemanager
+
+build-nodemanager:
+	./scripts/build-node.sh nodemanager
+
+build-historyserver:
+	./scripts/build-node.sh historyserver
+
+build-nodes: build-namenode build-datanode
+
+build-managers: build-resourcemanager build-nodemanager build-historyserver
+
+up-name:
+	# build volumes, network, and start namenode with extras (pig, hive)
+	@docker-compose -f compose/docker-compose-name.yml up -d
+up-data:
+	# add datanodes until worker limit of "${WORKERS}" is met
+	@number=1 ; while [[ $$number -le ${WORKERS} ]] ; do \
+		docker-compose --log-level ERROR -f compose/docker-compose-data.yml up -d --scale datanode=$$number; \
 		((number = number + 1)) ; \
     done
+up-managers:
+	# start resourcemanager, nodemanager and history server
+	@docker-compose -f compose/docker-compose-managers.yml up -d
 
-up: add-workers ${EXTRAS}
+up: up-name up-data up-managers
 
-# stop running containers, keeping networks and volumes intact
-stop: kill-extras
-	docker-compose stop
-# restart composed containers
+stop:
+	# stop running containers, keeping networks and volumes intact
+	@for value in name data managers; do \
+        docker-compose -f compose/docker-compose-$$value.yml stop; \
+    done
 restart:
-	docker-compose restart
-# tear down compose, delete all volumes and networks
-down: kill-extras
-	docker-compose down -v --remove-orphans
+	# restart composed containers
+	@for value in name data managers; do \
+          docker-compose -f compose/docker-compose-$$value.yml restart; \
+    done
 
-kill-extras: pig-kill hive-kill
+down-containers:
+	# tear down compose, delete all volumes and networks
+	@for value in name data managers; do \
+        docker-compose --log-level CRITICAL -f compose/docker-compose-$$value.yml down; \
+    done
 
-pig-kill:
-	@./scripts/rm-container.sh pignode
-pig-build:
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-pig:${TAG} --label pignode ./pig-install
-ifeq ($(BUILD),release)
-	docker image push ${IMAGE_FAMILY}-pig:${TAG}
-endif
-pig: pig-kill
-	docker run -it -d --name pignode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-pig:${TAG} bash
+down-volumes:
+	# remove volumes
+	@docker volume prune -f
 
-hive-kill:
-	@./scripts/rm-container.sh hivenode
-hive-build:
-	docker build --build-arg IMAGE_NAME=${IMAGE_FAMILY}-base:${TAG} -t ${IMAGE_FAMILY}-hive:${TAG} --label hivenode ./hive-install
-ifeq ($(BUILD),release)
-	docker image push ${IMAGE_FAMILY}-hive:${TAG}
-endif
-hive: hive-kill
-	docker run -it -d --name hivenode --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${IMAGE_FAMILY}-hive:${TAG} hive
+down: down-containers down-volumes
 
-extras-build: pig-build hive-build
 
 save:
 	./scripts/image-saves.sh
@@ -98,14 +98,14 @@ save:
 insert-crimes:
 	./scripts/get_crime_data.sh
 
-pig-crimes: insert-crimes pig
-	docker cp examples/pig/run.pig pignode:/run.pig
-	docker exec pignode hdfs dfs -ls /data
+pig-crimes: insert-crimes
+	@docker cp examples/pig/run.pig namenode:/run.pig
+	@docker exec namenode pig -f run.pig
 
 wordcount:
 	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount | tee >/dev/null
 	@docker exec namenode hdfs dfs -mkdir -p /input/
 	@docker exec namenode hadoop fs -put -f /opt/hadoop-3.2.3/README.txt /input/
-	@docker run --network ${DOCKER_NETWORK} --env-file ${ENV_FOLD}/hadoop.env ${COMPOSE_PROJECT_NAME}-wordcount
+	@docker run --network ${DOCKER_NETWORK} --env-file config/hadoop.env ${COMPOSE_PROJECT_NAME}-wordcount
 	@docker exec namenode hdfs dfs -cat /output/*
 	@docker exec namenode hdfs dfs -rm -r /output /input

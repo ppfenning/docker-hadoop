@@ -1,5 +1,7 @@
-ARG IMAGE_NAME=ppfenning/hadoop-base:master
-FROM ${IMAGE_NAME}
+ARG IMAGE_FAMILY=ppfenning/hadoop
+ARG TAG=master
+ARG PARENT=base
+FROM ${IMAGE_FAMILY}-${PARENT}:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 

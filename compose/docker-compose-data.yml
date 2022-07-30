@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+
+  datanode:
+    image: "${IMAGE_FAMILY}-datanode:${TAG}"
+    restart: always
+    ports:
+      - "9854-9864:9864"
+    deploy:
+      placement:
+        max_replicas_per_node: 10 # hard cap at 10 workers
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/datanode
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ../config/hadoop.env
+
+volumes:
+  hadoop_datanode:

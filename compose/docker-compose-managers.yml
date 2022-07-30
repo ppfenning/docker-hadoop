@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  
+  resourcemanager:
+    image: "${IMAGE_FAMILY}-resourcemanager:${TAG}"
+    container_name: resourcemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "datanode:9864"
+    env_file:
+      - ../config/hadoop.env
+
+  nodemanager:
+    depends_on:
+      - resourcemanager
+    image: "${IMAGE_FAMILY}-nodemanager:${TAG}"
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+    env_file:
+      - ../config/hadoop.env
+  
+  historyserver:
+    depends_on:
+      - resourcemanager
+    image: "${IMAGE_FAMILY}-historyserver:${TAG}"
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ../config/hadoop.env
+  
+volumes:
+  hadoop_historyserver:

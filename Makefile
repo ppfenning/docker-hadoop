@@ -18,6 +18,12 @@ else
 	IMAGE_FAMILY = localhost:5000/${COMPOSE_PROJECT_NAME}
 endif
 
+ifeq ($(EXTRAS),1)
+	PARENT = extras
+else
+	PARENT = base
+endif
+
 start: build up
 
 build: down build-base build-extras build-nodes build-managers

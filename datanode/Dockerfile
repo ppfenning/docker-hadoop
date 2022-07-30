@@ -5,7 +5,7 @@ FROM ${IMAGE_FAMILY}-${PARENT}:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
-HEALTHCHECK CMD curl -f http://localhost:$DATA_PORT/ || exit 1
+HEALTHCHECK CMD curl -f http://localhost:9864/ || exit 1
 
 ENV HDFS_CONF_dfs_datanode_data_dir=file:///hadoop/dfs/data
 RUN mkdir -p /hadoop/dfs/data

@@ -16,7 +16,7 @@ RUN ["/installers/hadoop/InstallJava8.sh"]
 ENV PATH=$PATH:$JAVA_HOME/bin
 
 # install Hadoop
-ENV HADOOP_VERSION=3.2.3
+ENV HADOOP_VERSION=3.2.4
 ENV HADOOP_URL="$BASE_URL/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz"
 # run
 RUN ["/installers/hadoop/InstallHadoop.sh"]

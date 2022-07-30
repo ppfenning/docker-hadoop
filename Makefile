@@ -88,8 +88,8 @@ restart:
 down-containers:
 	# tear down compose, delete all volumes and networks
 	@for value in name data managers; do \
-        docker-compose --log-level CRITICAL -f compose/docker-compose-$$value.yml down; \
-    done
+		docker-compose --log-level CRITICAL -f compose/docker-compose-$$value.yml down; \
+	done
 
 down-volumes:
 	# remove volumes
@@ -97,19 +97,18 @@ down-volumes:
 
 down: down-containers down-volumes
 
-
 save:
 	./scripts/image-saves.sh
 
 insert-crimes:
 	./scripts/get_crime_data.sh
 
-pig-crimes: insert-crimes
+pig-crimes: insert-crimes up
 	@docker cp examples/pig/run.pig namenode:/run.pig
 	@docker exec namenode pig -f run.pig
 
-wordcount:
-	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount | tee >/dev/null
+wordcount: up
+	@docker build -t ${COMPOSE_PROJECT_NAME}-wordcount ./examples/wordcount
 	@docker exec namenode hdfs dfs -mkdir -p /input/
 	@docker exec namenode hadoop fs -put -f /opt/hadoop-3.2.3/README.txt /input/
 	@docker run --network ${DOCKER_NETWORK} --env-file config/hadoop.env ${COMPOSE_PROJECT_NAME}-wordcount

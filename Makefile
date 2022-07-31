@@ -24,7 +24,7 @@ else
 	PARENT = base
 endif
 
-COMPOSE_FILE_BASE := compose-${PARENT}/docker-compose
+COMPOSE_FILE_BASE := ${PARENT}/compose/docker-compose
 
 ifeq ($(CACHED),0)
 	BUILD_FLAG = --build

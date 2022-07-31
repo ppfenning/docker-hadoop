@@ -2,16 +2,16 @@ version: "3.8"
 
 services:
   webapp:
-    build: ../webapp
+    build: ../../webapp
     container_name: webapp
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   namenode:
-    build: ../base
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    build: ..
+    image: "${IMAGE_FAMILY}-extras:${TAG}"
     container_name: namenode
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9870/"]
@@ -31,9 +31,11 @@ services:
       VIRTUAL_HOST: namenode.hadoop
       VIRTUAL_PORT: 9870
     env_file:
-      - ../config/hadoop.env
+      - ../../config/hadoop.env
+      - ../../config/extras.env
     command:
       - ./startup/start-namenode.sh
+      - ./installers/InitializeHive.sh
   
 volumes:
   hadoop_namenode:

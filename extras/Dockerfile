@@ -1,4 +1,4 @@
-ARG IMAGE_FAMILY=ppfenning/hadoop
+ARG IMAGE_FAMILY=ppfenning/final-project
 ARG TAG=master
 FROM ${IMAGE_FAMILY}-base:${TAG}
 

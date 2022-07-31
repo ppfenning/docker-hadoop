@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   datanode:
-    build: ../extras
+    build: ..
     image: "${IMAGE_FAMILY}-extras:${TAG}"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9864/" ]
@@ -25,8 +25,8 @@ services:
       VIRTUAL_HOST: datanode.hadoop
       VIRTUAL_PORT: 9864
     env_file:
-      - ../config/hadoop.env
-      - ../config/extras.env
+      - ../../config/hadoop.env
+      - ../../config/extras.env
     command:
       - ./startup/start-datanode.sh
 

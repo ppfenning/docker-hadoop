@@ -6,8 +6,12 @@ services:
     image: "${IMAGE_FAMILY}-resourcemanager:${TAG}"
     container_name: resourcemanager
     restart: always
+    ports:
+      - "8088:8088"
     environment:
       SERVICE_PRECONDITION: "datanode:9864"
+      VIRTUAL_HOST: resourcemanager.hadoop
+      VIRTUAL_PORT: 8088
     env_file:
       - ../config/hadoop.env
 
@@ -17,8 +21,12 @@ services:
     image: "${IMAGE_FAMILY}-nodemanager:${TAG}"
     container_name: nodemanager
     restart: always
+    ports:
+      - "8042:8042"
     environment:
       SERVICE_PRECONDITION: "resourcemanager:8088"
+      VIRTUAL_HOST: nodemanager.hadoop
+      VIRTUAL_PORT: 8042
     env_file:
       - ../config/hadoop.env
   
@@ -28,8 +36,12 @@ services:
     image: "${IMAGE_FAMILY}-historyserver:${TAG}"
     container_name: historyserver
     restart: always
+    ports:
+      - "8188:8188"
     environment:
       SERVICE_PRECONDITION: "resourcemanager:8088"
+      VIRTUAL_HOST: nodemanager.hadoop
+      VIRTUAL_PORT: 8188
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:

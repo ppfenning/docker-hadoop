@@ -6,7 +6,7 @@ echo "==========================================================================
 echo
 echo "Building ${nodename}..."
 echo
-docker build \
+docker build ${CACHED_FLAG} \
     --build-arg IMAGE_FAMILY="${IMAGE_FAMILY}" \
     --build-arg TAG="${TAG}" \
     --build-arg PARENT="${PARENT}" \

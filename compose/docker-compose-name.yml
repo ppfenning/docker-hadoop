@@ -1,17 +1,27 @@
 version: "3.8"
 
 services:
+  webapp:
+    build: ../webapp
+    container_name: webapp
+    ports:
+      - "8080:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
   namenode:
     image: "${IMAGE_FAMILY}-namenode:${TAG}"
     container_name: namenode
     restart: always
     ports:
       - "9870:9870"
-      - "9000:9000"
+      - "9999:9000"
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     environment:
       CLUSTER_NAME: big-data
+      VIRTUAL_HOST: namenode.hadoop
+      VIRTUAL_PORT: 9870
     env_file:
       - ../config/hadoop.env
   

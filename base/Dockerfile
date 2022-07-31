@@ -10,10 +10,10 @@ ADD hadoop/* /installers/hadoop/
 RUN chmod a+x /installers/hadoop/*
 
 # Install Java
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
+ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 # run
 RUN ["/installers/hadoop/InstallJava8.sh"]
-ENV PATH=$PATH:$JAVA_HOME/bin
+ENV PATH=$JAVA_HOME/bin/:$PATH
 
 # install Hadoop
 ENV HADOOP_VERSION=3.2.4
@@ -28,8 +28,8 @@ ENV USER=root
 ENV PATH=$HADOOP_HOME/bin/:$PATH
 
 # get scripts in folder
-ADD entrypoint.sh /entrypoint.sh
+ADD entrypoint.sh /scripts/
 # make executable
-RUN chmod a+x /entrypoint.sh
+RUN chmod a+x /scripts/entrypoint.sh
 # run
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/scripts/entrypoint.sh"]

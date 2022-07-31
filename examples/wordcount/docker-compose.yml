@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+
+  wordcount:
+    build:
+      context: .
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        TAG: "${TAG}"
+        PARENT: "${PARENT}"
+    image: "${IMAGE_FAMILY}-wordcount:${TAG}"
+    container_name: wordcount
+    restart: always
+    expose:
+      - "9673"
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+      VIRTUAL_HOST: wordcount.hadoop
+      VIRTUAL_PORT: 9673
+    env_file:
+      - ../../config/hadoop.env

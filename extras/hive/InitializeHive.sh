@@ -1,16 +1,10 @@
 #!/bin/bash
 
-function mkdirHadoop() {
-  local newdir=$1
+# source custom functions
+source /functions/property_helper.sh
+source /functions/hdfs_tools.sh
 
-  hadoop fs -test -d "$newdir";
-
-  if [ $? -eq 1 ]
-  then
-      hdfs dfs -mkdir -p "$newdir"
-  fi
-  hdfs dfs -chmod a+w "$newdir"
-}
-
+configure "${HIVE_SITE_DIR}/hive-site.xml" hive HIVE_CONF
 mkdirHadoop /tmp/hive
 mkdirHadoop /user/hive/warehouse
+schematool -dbType derby -initSchema

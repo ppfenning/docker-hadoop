@@ -10,20 +10,32 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   namenode:
-    image: "${IMAGE_FAMILY}-namenode:${TAG}"
+    build: ../extras
+    image: "${IMAGE_FAMILY}-extras:${TAG}"
     container_name: namenode
-    restart: always
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9870/"]
+      timeout: 45s
+      interval: 10s
+      retries: 5
+    expose:
+      - "9870"
     ports:
       - "9870:9870"
       - "9999:9000"
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     environment:
+      HDFS_CONF_dfs_namenode_name_dir: file:///hadoop/dfs/name
       CLUSTER_NAME: big-data
       VIRTUAL_HOST: namenode.hadoop
       VIRTUAL_PORT: 9870
     env_file:
       - ../config/hadoop.env
+      - ../config/extras.env
+    command:
+      - ./startup/start-namenode.sh
+      - ./installers/InitializeHive.sh
   
 volumes:
   hadoop_namenode:

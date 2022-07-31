@@ -28,6 +28,7 @@ ENV HIVE_BASE=/usr/local/hive
 ENV HIVE_HOME="$HIVE_BASE/apache-hive-$HIVE_VERSION-bin"
 # run
 RUN ["/installers/hive/InstallHive.sh"]
+
 # update path
 ENV PATH=$HIVE_HOME/bin/:$PATH
 ENV CLASSPATH=$HADOOP_HOME/lib/:$HIVE_HOME/lib/:$CLASSPATH

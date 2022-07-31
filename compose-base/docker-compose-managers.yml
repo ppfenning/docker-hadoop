@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  
+  resourcemanager:
+    build: ../base
+    image: "${IMAGE_FAMILY}-base:${TAG}"
+    container_name: resourcemanager
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8088/" ]
+      timeout: 45s
+      interval: 10s
+      retries: 5
+    expose:
+      - "8088"
+    ports:
+      - "8088:8088"
+    environment:
+      SERVICE_PRECONDITION: "datanode:9864"
+      VIRTUAL_HOST: resourcemanager.hadoop
+      VIRTUAL_PORT: 8088
+    env_file:
+      - ../config/hadoop.env
+    command:
+      - ./startup/start-resourcemanager.sh
+
+  nodemanager:
+    depends_on:
+      - resourcemanager
+    build: ../base
+    image: "${IMAGE_FAMILY}-base:${TAG}"
+    container_name: nodemanager
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8042/" ]
+      timeout: 45s
+      interval: 10s
+      retries: 5
+    expose:
+      - "8042"
+    ports:
+      - "8042:8042"
+    environment:
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+      VIRTUAL_HOST: nodemanager.hadoop
+      VIRTUAL_PORT: 8042
+    env_file:
+      - ../config/hadoop.env
+    command:
+      - ./startup/start-nodemanager.sh
+  
+  historyserver:
+    depends_on:
+      - resourcemanager
+    build: ../base
+    image: "${IMAGE_FAMILY}-base:${TAG}"
+    container_name: historyserver
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8188/" ]
+      timeout: 45s
+      interval: 10s
+      retries: 5
+    expose:
+      - "8188"
+    ports:
+      - "8188:8188"
+    environment:
+      YARN_CONF_yarn_timeline___service_leveldb___timeline___store_path: /hadoop/yarn/timeline
+      SERVICE_PRECONDITION: "resourcemanager:8088"
+      VIRTUAL_HOST: historyserver.hadoop
+      VIRTUAL_PORT: 8188
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ../config/hadoop.env
+    command:
+      - ./startup/start-historyserver.sh
+  
+volumes:
+  hadoop_historyserver:

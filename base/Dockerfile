@@ -2,10 +2,14 @@ FROM ubuntu:latest
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
-# extras
+##########################################################################################
+### VANILLA HADOOP INSTALL
+##########################################################################################
+
+# apache software download source
 ENV BASE_URL=https://dlcdn.apache.org
 # get install scripts in folder
-ADD hadoop/* /installers/hadoop/
+ADD hadoop/ /installers/hadoop/
 # make executable
 RUN chmod a+x /installers/hadoop/*
 
@@ -26,6 +30,16 @@ ENV HADOOP_CONF_DIR=/etc/hadoop
 ENV MULTIHOMED_NETWORK=1
 ENV USER=root
 ENV PATH=$HADOOP_HOME/bin/:$PATH
+
+# add startup scripts
+ADD startup/ /startup/
+# make executable
+RUN chmod a+x /startup/*
+
+# add helper functions to folder
+ADD functions/ /functions
+# make executable
+RUN chmod a+x /functions
 
 # get scripts in folder
 ADD entrypoint.sh /scripts/

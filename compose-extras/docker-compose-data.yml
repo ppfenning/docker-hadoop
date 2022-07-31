@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+
+  datanode:
+    build: ../extras
+    image: "${IMAGE_FAMILY}-extras:${TAG}"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9864/" ]
+      timeout: 45s
+      interval: 10s
+      retries: 5
+    expose:
+      - "9864"
+    ports:
+      - "9854-9864:9864"
+    deploy:
+      placement:
+        max_replicas_per_node: 10 # hard cap at 10 workers
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/datanode
+    environment:
+      HDFS_CONF_dfs_datanode_data_dir: file:///hadoop/dfs/data
+      SERVICE_PRECONDITION: "namenode:9870"
+      VIRTUAL_HOST: datanode.hadoop
+      VIRTUAL_PORT: 9864
+    env_file:
+      - ../config/hadoop.env
+      - ../config/extras.env
+    command:
+      - ./startup/start-datanode.sh
+
+volumes:
+  hadoop_datanode:

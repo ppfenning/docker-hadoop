@@ -20,7 +20,7 @@ services:
       VIRTUAL_HOST: resourcemanager.hadoop
       VIRTUAL_PORT: 8088
     env_file:
-      - ../../config/hadoop.env
+      - ../../env_files/hadoop.env
     command:
       - ./startup/start-resourcemanager.sh
 
@@ -44,7 +44,7 @@ services:
       VIRTUAL_HOST: nodemanager.hadoop
       VIRTUAL_PORT: 8042
     env_file:
-      - ../../config/hadoop.env
+      - ../../env_files/hadoop.env
     command:
       - ./startup/start-nodemanager.sh
   
@@ -71,7 +71,7 @@ services:
     volumes:
       - hadoop_historyserver:/hadoop/yarn/timeline
     env_file:
-      - ../../config/hadoop.env
+      - ../../env_files/hadoop.env
     command:
       - ./startup/start-historyserver.sh
   

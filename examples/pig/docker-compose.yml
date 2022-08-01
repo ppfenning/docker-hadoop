@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+
+  pig-crimes:
+    build: .
+    image: "${IMAGE_FAMILY}-pig:${TAG}"
+    volumes:
+      - ../data/Chicago_Crimes.zip:/data/Chicago_Crimes.zip
+      - ./pig.sh:/scripts/pig.sh
+      - ./run.pig:/scripts/run.pig
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ../../env_files/hadoop.env
+      - ../../env_files/hive.env
+    command: bash -c "chmod a+x /scripts/pig.sh && /scripts/pig.sh"

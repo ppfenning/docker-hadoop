@@ -26,7 +26,7 @@ services:
       VIRTUAL_PORT: 9864
     env_file:
       - ../../config/hadoop.env
-      - ../../config/extras.env
+      - ../../config/hive.env
     command:
       - ./startup/start-datanode.sh
 

@@ -1,11 +1,11 @@
-include config/.env.base
+include .env
 export
 
 ifndef ENV
 $(error The ENV variable is missing.)
 endif
 
-include config/.env.${ENV}
+include config/${ENV}.env
 export
 
 $(shell chmod a+x scripts/*)
@@ -18,89 +18,154 @@ else
 	IMAGE_FAMILY = localhost:5000/${COMPOSE_PROJECT_NAME}
 endif
 
-ifeq ($(EXTRAS),1)
-	PARENT = extras
-else
-	PARENT = base
-endif
-
-COMPOSE_FILE_BASE := ${PARENT}/compose/docker-compose
-
 ifeq ($(CACHED),0)
 	BUILD_FLAG = --build
 	CACHED_FLAG = --no-cache
 endif
 
-
-
+# runs everything important with make
 start: down build up
 
+# safe commands for whole network
 build: build-base build-extras
+up: up-vanilla up-extras
+down: down-vanilla down-extras down-volumes down-cache
+stop: stop-extras stop-base
+restart: restart-extras restart-base
 
+# cleaning tools
+down-volumes:
+	# remove volumes
+	@docker volume prune -f
+down-cache:
+	# prune cache
+	@docker builder prune -f
+
+# save build images to file
+save:
+	./scripts/image-saves.sh
+
+#######################################################################################################################
+### BASE IMAGE
+#######################################################################################################################
+
+# base hadoop image
 build-base:
 	docker build ${CACHED_FLAG} -t ${IMAGE_FAMILY}-base:${TAG} ./base
 ifeq ($(RELEASE),1)
 	docker push ${IMAGE_FAMILY}-base:${TAG}
 endif
 
-build-extras:
-	docker build ${CACHED_FLAG} --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} --build-arg TAG=${TAG} -t ${IMAGE_FAMILY}-extras:${TAG} ./extras
-ifeq ($(RELEASE),1)
-	docker push ${IMAGE_FAMILY}-extras:${TAG}
-endif
+#######################################################################################################################
+### VANILLA NODES
+#######################################################################################################################
 
+# commands for namenode
 up-name:
 	# build volumes, network, and start namenode with extras (pig, hive)
-	@docker-compose -f ${COMPOSE_FILE_BASE}-name.yml up ${BUILD_FLAG} -d
+	@docker-compose -f base/compose/docker-compose-name.yml up ${BUILD_FLAG} -d
+stop-name:
+	@docker-compose -f base/compose/docker-compose-name.yml stop
+restart-name:
+	@docker-compose -f base/compose/docker-compose-name.yml restart
+down-name:
+	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-name.yml down
+
+# commands for datanode
 up-data:
 	# add datanodes until worker limit of "${WORKERS}" is met
 	@number=1 ; while [[ $$number -le ${WORKERS} ]] ; do \
-		docker-compose --log-level ERROR -f ${COMPOSE_FILE_BASE}-data.yml up ${BUILD_FLAG} -d --scale datanode=$$number; \
+		docker-compose --log-level ERROR -f base/compose/docker-compose-data.yml up ${BUILD_FLAG} -d --scale datanode=$$number; \
 		((number = number + 1)) ; \
     done
+stop-data:
+	@docker-compose -f base/compose/docker-compose-data.yml stop
+restart-data:
+	@docker-compose -f base/compose/docker-compose-data.yml restart
+down-data:
+	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-data.yml down
+
+# commands for managers
 up-managers:
 	# start resourcemanager, nodemanager and history server
-	@docker-compose -f ${COMPOSE_FILE_BASE}-managers.yml up ${BUILD_FLAG} -d
+	@docker-compose -f base/compose/docker-compose-managers.yml up ${BUILD_FLAG} -d
+stop-managers:
+	@docker-compose -f base/compose/docker-compose-managers.yml stop
+restart-managers:
+	@docker-compose -f base/compose/docker-compose-managers.yml restart
+down-managers:
+	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-managers.yml down
 
-up: up-name up-data up-managers
+# commands for vanilla tools
+up-vanilla: up-name up-data up-managers
+down-vanilla: down-managers down-data down-name
+stop-vanilla: stop-managers stop-data stop-name
+restart-vanilla: restart-managers restart-data restart-name
 
-stop:
-	# stop running containers, keeping networks and volumes intact
-	@for value in name data managers; do \
-        docker-compose -f ${COMPOSE_FILE_BASE}-$$value.yml stop; \
-    done
-restart:
-	# restart composed containers
-	@for value in name data managers; do \
-          docker-compose -f ${COMPOSE_FILE_BASE}-$$value.yml restart; \
-    done
+#######################################################################################################################
+### ADDITIONAL TOOLS
+#######################################################################################################################
 
-down-containers:
-	# tear down compose, delete all volumes and networks, prune cache
-	@for value in name data managers; do \
-		docker-compose --log-level CRITICAL -f ${COMPOSE_FILE_BASE}-$$value.yml down; \
-	done
+# pig tools
+build-pig:
+	@docker build ${CACHED_FLAG} --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} --build-arg TAG=${TAG} -t ${IMAGE_FAMILY}-pig:${TAG} ./extras/pig
+ifeq ($(RELEASE),1)
+	docker push ${IMAGE_FAMILY}-pig:${TAG}
+endif
+up-pig:
+	@docker-compose -f extras/pig/docker-compose.yml up ${BUILD_FLAG} -d
+down-pig:
+	@docker-compose --log-level=CRITICAL -f extras/pig/docker-compose.yml down -v
+stop-pig:
+	@docker-compose -f extras/pig/docker-compose.yml stop
+restart-pig:
+	@docker-compose -f extras/pig/docker-compose.yml restart
 
-down-volumes:
-	# remove volumes
-	@docker volume prune -f
+# hive tools
+build-hive:
+	@docker build ${CACHED_FLAG} --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} --build-arg TAG=${TAG} -t ${IMAGE_FAMILY}-hive:${TAG} ./extras/hive
+ifeq ($(RELEASE),1)
+	docker push ${IMAGE_FAMILY}-hive:${TAG}
+endif
+up-hive:
+	@docker-compose -f extras/hive/docker-compose.yml up ${BUILD_FLAG} -d
+down-hive:
+	@docker-compose --log-level=CRITICAL -f extras/hive/docker-compose.yml down -v
+stop-hive:
+	@docker-compose -f extras/hive/docker-compose.yml stop
+restart-hive:
+	@docker-compose -f extras/hive/docker-compose.yml restart
 
-down-cache:
-	# prune cache
-	@docker builder prune -f
+# spark tools
+build-spark:
+	@docker-compose -f extras/spark/docker-compose.yml build ${CACHED_FLAG}
+ifeq ($(RELEASE),1)
+	docker push ${IMAGE_FAMILY}-spark:${TAG}
+endif
+up-spark:
+	@docker-compose -f extras/spark/docker-compose.yml up ${BUILD_FLAG} -d
+down-spark:
+	@docker-compose --log-level=CRITICAL -f extras/spark/docker-compose.yml down -v
+stop-spark:
+	@docker-compose -f extras/spark/docker-compose.yml stop
+restart-spark:
+	@docker-compose -f extras/spark/docker-compose.yml stop
 
-down: down-containers down-volumes down-cache
+# grouped commands for extra tools
+up-extras: up-hive up-pig
+build-extras: build-hive build-pig
+down-extras: down-pig down-hive
+stop-extras: stop-pig stop-hive
+restart-extras: restart-pig restart-hive
 
-save:
-	./scripts/image-saves.sh
+#######################################################################################################################
+### EXAMPLE PROBLEMS
+#######################################################################################################################
 
 insert-crimes:
 	./scripts/get_crime_data.sh
-
 pig-crimes: insert-crimes
-	@docker cp examples/pig/run.pig namenode:/scripts/run.pig
-	@docker exec namenode pig -f /scripts/run.pig
-
+	./scripts/run-example.sh pig
 wordcount:
 	./scripts/run-example.sh wordcount
 

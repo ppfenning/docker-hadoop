@@ -4,9 +4,13 @@ FROM ${IMAGE_FAMILY}-base:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
-ADD pig/ /installers/pig
-ADD hive/ /installers/hive
-ADD spark/ /installers/spark
+# starter functions
+ADD pig /installers/pig
+ADD hive/InstallHive.sh /installers/hive/
+ADD hive/InitializeHive.sh /startup/hive/
+ADD spark /installers/spark
+# make executable
+RUN chmod a+x /startup/*
 RUN chmod -R a+x /installers/*
 
 # installer

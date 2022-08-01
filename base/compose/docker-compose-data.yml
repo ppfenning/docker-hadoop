@@ -25,7 +25,7 @@ services:
       VIRTUAL_HOST: datanode.hadoop
       VIRTUAL_PORT: 9864
     env_file:
-      - ../../config/hadoop.env
+      - ../../env_files/hadoop.env
     command:
       - ./startup/start-datanode.sh
 

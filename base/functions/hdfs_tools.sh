@@ -12,15 +12,18 @@ function mkdirHadoop() {
   hdfs dfs -chmod a+w "${newdir}"
 }
 
-function addZippedCSVDataHadoop() {
+function addCSVDataHadoop() {
 
     local datafile=$1
-    fname="$(echo "${datafile}" | cut -d'.' -f1).csv"
+    fname="$(basename "${datafile}" | cut -d'.' -f1).csv"
 
     # check if file on hdfs
-    mkdirHadoop /data/
-    unzip "$datafile"
-    hadoop fs -put -f "$fname" /data
-    rm "$datafile" "$fname"
-
+    hdfs dfs -test -f "/data/${fname}";
+    # if no, load it
+    if [ $? -eq 1 ]; then
+        mkdirHadoop /data/
+        unzip "${datafile}" -d /data/
+        hdfs dfs -put -f "/data/${fname}" /data/
+    fi
+    hadoop fs -cat "/data/${fname}" | head
 }

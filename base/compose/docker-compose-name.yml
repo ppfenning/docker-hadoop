@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   webapp:
-    build: ../../webapp
+    build: ../webapp
     container_name: webapp
     ports:
       - "8080:8080"
@@ -31,7 +31,7 @@ services:
       VIRTUAL_HOST: namenode.hadoop
       VIRTUAL_PORT: 9870
     env_file:
-      - ../../config/hadoop.env
+      - ../../env_files/hadoop.env
     command:
       - ./startup/start-namenode.sh
   

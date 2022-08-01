@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+
+  pignode:
+    build: .
+    image: "${IMAGE_FAMILY}-pig:${TAG}"
+    container_name: pignode
+    environment:
+      SERVICE_PRECONDITION: "hive-server:9870"
+    env_file:
+      - ../../env_files/hadoop.env
+      - ../../env_files/hive.env

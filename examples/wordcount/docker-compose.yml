@@ -3,19 +3,8 @@ version: "3.8"
 services:
 
   wordcount:
-    build:
-      context: ../../base
+    build: ../../base
     image: "${IMAGE_FAMILY}-base:${TAG}"
-    container_name: wordcount
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9673/" ]
-      timeout: 45s
-      interval: 10s
-      retries: 5
-    expose:
-      - "9673"
-    ports:
-      - "9673:9673"
     volumes:
       - ./WordCount.jar:/opt/hadoop/applications/WordCount.jar
       - ./wordcount.sh:/scripts/wordcount.sh
@@ -24,10 +13,8 @@ services:
       JAR_FILEPATH: /opt/hadoop/applications/WordCount.jar
       CLASS_TO_RUN: "WordCount"
       PARAMS: "/input /output"
-      # nginx info
+      # check for namenode
       SERVICE_PRECONDITION: "namenode:9870"
-      VIRTUAL_HOST: wordcount.hadoop
-      VIRTUAL_PORT: 9673
     env_file:
-      - ../../config/hadoop.env
-    command: bash -c "chmod a+w /scripts/wordcount.sh && /scripts/wordcount.sh"
+      - ../../env_files/hadoop.env
+    command: bash -c "chmod a+x /scripts/wordcount.sh && /scripts/wordcount.sh"

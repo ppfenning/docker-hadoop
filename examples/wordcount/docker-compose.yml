@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   wordcount:
-    build: ../../base
+    build: ../../hadoop
     image: "${IMAGE_FAMILY}-base:${TAG}"
     volumes:
       - ./WordCount.jar:/opt/hadoop/applications/WordCount.jar

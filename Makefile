@@ -2,6 +2,10 @@ include .env
 export
 
 ifndef ENV
+TAG := $(shell git rev-parse --abbrev-ref HEAD)
+endif
+
+ifndef TAG
 $(error The ENV variable is missing.)
 endif
 

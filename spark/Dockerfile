@@ -1,14 +1,12 @@
-ARG IMAGE_FAMILY=ppfenning/final-project
+ARG IMAGE_FAMILY=ppfenning/docker
 ARG TAG=master
-FROM ${IMAGE_FAMILY}-base:${TAG}
+FROM ${IMAGE_FAMILY}-hadoop:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
 # starter functions
-ADD pig /installers/pig
-ADD hive/InstallHive.sh /installers/hive/
-ADD hive/InitializeHive.sh /startup/hive/
 ADD spark /installers/spark
+
 # make executable
 RUN chmod a+x /startup/*
 RUN chmod -R a+x /installers/*

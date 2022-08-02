@@ -2,9 +2,10 @@
 ### HIVE IMAGE
 ##########################################################################################
 
-ARG IMAGE_FAMILY=ppfenning/final-project
+ARG IMAGE_FAMILY=ppfenning/docker
+ARG BACKEND=hadoop
 ARG TAG=master
-FROM ${IMAGE_FAMILY}-hadoop:${TAG}
+FROM ${IMAGE_FAMILY}-${BACKEND}:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 

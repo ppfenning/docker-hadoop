@@ -1,37 +1,32 @@
 include .env
 export
 
-ifndef ENV
+ENV := dev
 TAG := $(shell git rev-parse --abbrev-ref HEAD)
+COMPOSE_PROJECT_NAME := docker
+ACCOUNT_NAME := ppfenning
+DOCKER_NETWORK := ${COMPOSE_PROJECT_NAME}_default
+WORKERS := 2
+CACHES := 1
+RELEASE := 0
+
+ifneq ($(RELEASE),1)
+	ACCOUNT_NAME := localhost:5000
 endif
+IMAGE_FAMILY := ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
 
-ifndef TAG
-$(error The ENV variable is missing.)
-endif
-
-include config/${ENV}.env
-export
-
-$(shell chmod a+x scripts/*)
-
-DOCKER_NETWORK = ${COMPOSE_PROJECT_NAME}_default
-
-ifeq ($(RELEASE),1)
-	IMAGE_FAMILY = ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
-else
-	IMAGE_FAMILY = localhost:5000/${COMPOSE_PROJECT_NAME}
-endif
+$(shell chmod +x scripts/* lib/*)
 
 ifeq ($(CACHED),0)
-	BUILD_FLAG = --build
-	CACHED_FLAG = --no-cache
+	BUILD_FLAG := --build
+	CACHED_FLAG := --no-cache
 endif
 
+STE = bash sourceThenExec.sh
 # runs everything important with make
 start: down build up
 
 # safe commands for whole network
-up: up-vanilla up-extras
 down: down-vanilla down-extras down-volumes down-cache
 stop: stop-extras stop-base
 restart: restart-extras restart-base
@@ -59,7 +54,11 @@ hive.build : hive
 pig.build : pig
 
 %.build:
-	@source scripts/docker-helper.sh && dockerBuild $^
+	@$(STE) dockerBuild $^
+%.up:
+	@$(STE) dockerUp $^
+%.run:
+	@$(STE) dockerRun $^
 
 
 #######################################################################################################################
@@ -67,22 +66,21 @@ pig.build : pig
 #######################################################################################################################
 
 # commands for namenode
-up-name:
-	source scripts/docker_commands.sh && dockerUp hadoop/compose/docker-compose-name.yml
+
+up: | namenode.up managers.up
+namenode.up: hadoop/compose/docker-compose-name.yml
+managers.up: hadoop/compose/docker-compose-managers.yml
+
 stop-name:
 	@docker-compose -f base/compose/docker-compose-name.yml stop
 restart-name:
 	@docker-compose -f base/compose/docker-compose-name.yml restart
 down-name:
-	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-name.yml down
+	@docker-compose -f hadoop/compose/docker-compose-name.yml down
 
-# commands for datanode
-up-data:
-	# add datanodes until worker limit of "${WORKERS}" is met
-	@number=1 ; while [[ $$number -le ${WORKERS} ]] ; do \
-		docker-compose --log-level ERROR -f base/compose/docker-compose-data.yml up ${BUILD_FLAG} -d --scale datanode=$$number; \
-		((number = number + 1)) ; \
-    done
+
+datanode.scaled:
+	@$(STE) dockerScale datanode hadoop/compose/docker-compose-data.yml 9864
 stop-data:
 	@docker-compose -f base/compose/docker-compose-data.yml stop
 restart-data:
@@ -141,13 +139,12 @@ restart-spark:
 
 # grouped commands for extra tools
 up-extras: up-hive up-pig
-build-extras: build-hive build-pig
 down-extras: down-pig down-hive
 stop-extras: stop-pig stop-hive
 restart-extras: restart-pig restart-hive
 
 #######################################################################################################################
-### EXAMPLE PROBLEMS
+### EXAMPLES
 #######################################################################################################################
 
 insert-crimes:
@@ -155,5 +152,7 @@ insert-crimes:
 
 pig.example: pig | insert-crimes
 wordcount.example: wordcount
+wordcount:
+
 %.example:
 	@./scripts/run-example.sh $^

@@ -4,7 +4,7 @@ services:
   
   resourcemanager:
     build: ..
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
     container_name: resourcemanager
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8088/" ]
@@ -28,7 +28,7 @@ services:
     depends_on:
       - resourcemanager
     build: ..
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
     container_name: nodemanager
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8042/" ]
@@ -52,7 +52,7 @@ services:
     depends_on:
       - resourcemanager
     build: ..
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
     container_name: historyserver
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8188/" ]

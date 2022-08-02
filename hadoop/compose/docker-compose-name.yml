@@ -11,7 +11,7 @@ services:
 
   namenode:
     build: ..
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
     container_name: namenode
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9870/"]

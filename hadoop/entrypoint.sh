@@ -11,6 +11,12 @@ configure "${HADOOP_CONF_DIR}/hdfs-site.xml" hdfs HDFS_CONF
 configure "${HADOOP_CONF_DIR}/yarn-site.xml" yarn YARN_CONF
 configure "${HADOOP_CONF_DIR}/httpfs-site.xml" httpfs HTTPFS_CONF
 configure "${HADOOP_CONF_DIR}/kms-site.xml" kms KMS_CONF
+
+# these were not passing until runtime
+export MAPRED_CONF_yarn_app_mapreduce_am_env="HADOOP_MAPRED_HOME=${HADOOP_HOME}"
+export MAPRED_CONF_mapreduce_map_env="HADOOP_MAPRED_HOME=${HADOOP_HOME}"
+export MAPRED_CONF_mapreduce_reduce_env="HADOOP_MAPRED_HOME=${HADOOP_HOME}"
+# now we can configure correctly
 configure "${HADOOP_CONF_DIR}/mapred-site.xml" mapred MAPRED_CONF
 
 if [ "$MULTIHOMED_NETWORK" = "1" ]; then

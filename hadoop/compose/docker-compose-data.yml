@@ -4,7 +4,7 @@ services:
 
   datanode:
     build: ..
-    image: "${IMAGE_FAMILY}-base:${TAG}"
+    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9864/" ]
       timeout: 45s
@@ -13,7 +13,7 @@ services:
     expose:
       - "9864"
     ports:
-      - "9854-9864:9864"
+      - "9864:9864"
     deploy:
       placement:
         max_replicas_per_node: 10 # hard cap at 10 workers
@@ -22,8 +22,6 @@ services:
     environment:
       HDFS_CONF_dfs_datanode_data_dir: file:///hadoop/dfs/data
       SERVICE_PRECONDITION: "namenode:9870"
-      VIRTUAL_HOST: datanode.hadoop
-      VIRTUAL_PORT: 9864
     env_file:
       - ../../env_files/hadoop.env
     command:

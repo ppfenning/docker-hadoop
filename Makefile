@@ -1,19 +1,14 @@
 include .env
 export
 
-ENV := dev
-TAG := $(shell git rev-parse --abbrev-ref HEAD)
-COMPOSE_PROJECT_NAME := docker
-ACCOUNT_NAME := ppfenning
-DOCKER_NETWORK := ${COMPOSE_PROJECT_NAME}_default
-WORKERS := 2
-CACHES := 1
-RELEASE := 0
-
 ifneq ($(RELEASE),1)
-	ACCOUNT_NAME := localhost:5000
+	ACCOUNT_NAME = localhost:5000
 endif
+
+TAG := $(shell git rev-parse --abbrev-ref HEAD)
+DOCKER_NETWORK := ${COMPOSE_PROJECT_NAME}_default
 IMAGE_FAMILY := ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
+COMPOSE_PREFIX := ${BACKEND}/compose/docker-compose
 
 $(shell chmod +x scripts/* lib/*)
 
@@ -24,11 +19,7 @@ endif
 
 STE = bash sourceThenExec.sh
 # runs everything important with make
-start: build down up
-
-clean:
-	@docker volume prune -f
-	@docker builder prune -f
+init: build down up
 
 # save build images to file
 save:
@@ -42,20 +33,17 @@ save:
 	@$(STE) dockerBuild $^
 %.up:
 	@$(STE) dockerUp $^
-%.down:
-	@$(STE) dockerDown $^
-%.run:
-	@$(STE) dockerRun $^
-%.remove:
-	@$(STE) dockerRemove $^
-%.ps:
-	@docker-compose -f $^ ps
 
 #######################################################################################################################
 ### BUILD IMAGES
 #######################################################################################################################
 
-build: | hadoop.build hive.build pig.build
+.PHONY: hadoop spark hive pig
+
+build-all: build-hadoop build-spark
+build: | build-${BACKEND}
+build-hadoop: | hadoop.build hive.build pig.build
+build-spark: | spark.build hive.build pig.build
 hadoop.build : hadoop
 spark.build : spark
 hive.build : hive
@@ -68,57 +56,29 @@ pig.build : pig
 
 # commands for namenode
 
-up: | namenode.up datanode-scaled managers.up
-down: | managers.down datanode-down namenode.down clean
+up: | namenode.up datanode-scaled managers.up pig.up hive.up
+down:
+	@$(STE) dockerDown
+stop:
+	@$(STE) dockerStop
+start:
+	@$(STE) dockerStart
+restart:
+	@$(STE) dockerRestart
+clean:
+	@$(STE) dockerPrune
 
-namenode.up: hadoop/compose/docker-compose-name.yml
-namenode.down: hadoop/compose/docker-compose-name.yml
-namenode.ps: hadoop/compose/docker-compose-name.yml
-
+namenode.up: ${COMPOSE_PREFIX}-name.yml
 datanode-scaled:
-	@$(STE) dockerScale datanode hadoop/compose/docker-compose-data.yml 9864
-datanode-down:
-	#@$(STE) dockerScaleDown datanode 0
-
-managers.up: hadoop/compose/docker-compose-managers.yml
-managers.down: hadoop/compose/docker-compose-managers.yml
-managers.ps: hadoop/compose/docker-compose-managers.yml
-
-hadoop-ps:
-	@docker-compose -f hadoop/compose/docker-compose-name.yml ps
-	@docker ps -q
+	@$(STE) dockerScale datanode ${COMPOSE_PREFIX}-data.yml 9864
+managers.up: ${COMPOSE_PREFIX}-managers.yml
 
 #######################################################################################################################
 ### ADDITIONAL TOOLS
 #######################################################################################################################
 
-# pig tools
-up-pig:
-	@docker-compose -f extras/pig/docker-compose.yml up ${BUILD_FLAG} -d
-down-pig:
-	@docker-compose --log-level=CRITICAL -f extras/pig/docker-compose.yml down -v
-stop-pig:
-	@docker-compose -f extras/pig/docker-compose.yml stop
-restart-pig:
-	@docker-compose -f extras/pig/docker-compose.yml restart
-
-up-hive:
-	@docker-compose -f extras/hive/docker-compose.yml up ${BUILD_FLAG} -d
-down-hive:
-	@docker-compose --log-level=CRITICAL -f extras/hive/docker-compose.yml down -v
-stop-hive:
-	@docker-compose -f extras/hive/docker-compose.yml stop
-restart-hive:
-	@docker-compose -f extras/hive/docker-compose.yml restart
-
-up-spark:
-	@docker-compose -f extras/spark/docker-compose.yml up ${BUILD_FLAG} -d
-down-spark:
-	@docker-compose --log-level=CRITICAL -f extras/spark/docker-compose.yml down -v
-stop-spark:
-	@docker-compose -f extras/spark/docker-compose.yml stop
-restart-spark:
-	@docker-compose -f extras/spark/docker-compose.yml stop
+pig.up: pig/docker-compose.yml
+hive.up: hive/docker-compose.yml
 
 #######################################################################################################################
 ### EXAMPLES
@@ -127,9 +87,9 @@ restart-spark:
 insert-crimes:
 	./scripts/get_crime_data.sh
 
-pig.example: pig | insert-crimes
-wordcount.example: wordcount
-wordcount:
+.PHONY: wordcount pig-crime
+pig-crime.example: pig-crime examples/pig-crime/docker-compose.yml | insert-crimes
+wordcount.example: wordcount examples/wordcount/docker-compose.yml
 
 %.example:
 	@./scripts/run-example.sh $^

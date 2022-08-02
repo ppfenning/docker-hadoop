@@ -2,9 +2,14 @@ version: "3.8"
 
 services:
 
-  pig-crimes:
-    build: .
-    image: "${IMAGE_FAMILY}-pig:${TAG}"
+  pig-crime:
+    build:
+      context: .../../pig
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-pig-${BACKEND}:${TAG}"
     volumes:
       - ../data/Chicago_Crimes.zip:/data/Chicago_Crimes.zip
       - ./pig.sh:/scripts/pig.sh

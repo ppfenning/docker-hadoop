@@ -1,11 +1,16 @@
 #!/bin/bash
 
+source ./lib/docker-helper.sh
+
 example=$1
+compose_file=$2
 
 echo "================================================================================================================="
 echo "Running example container ${example}..."
 echo "================================================================================================================="
-docker-compose -f examples/"${example}"/docker-compose.yml up ${BUILD_FLAG}
+erun docker-compose -f ${compose_file} run ${example}
 echo "================================================================================================================="
-echo "Job complete! Removing Container: $(docker ps -a | grep Exit | cut -d ' ' -f 1 | xargs docker rm)"
+echo "Job complete!"
+echo "================================================================================================================="
+dockerPrune
 echo "================================================================================================================="

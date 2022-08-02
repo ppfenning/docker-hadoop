@@ -3,8 +3,13 @@ version: "3.8"
 services:
 
   wordcount:
-    build: ../../hadoop
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ../../${BACKEND}
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     volumes:
       - ./WordCount.jar:/opt/hadoop/applications/WordCount.jar
       - ./wordcount.sh:/scripts/wordcount.sh

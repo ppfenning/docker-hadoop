@@ -27,12 +27,7 @@ function dockerBuild() {
 
 function dockerUp() {
     compose_file=$1
-    docker-compose -f ${compose_file} up ${BUILD_FLAG} -d
-}
-
-function dockerDown() {
-    compose_file=$1
-    docker-compose -f ${compose_file} rm -sfv
+    docker-compose -f ${compose_file} up ${BUILD_FLAG} --no-recreate -d
 }
 
 function dockerRun() {
@@ -47,6 +42,39 @@ function dockerRun() {
     echo "### Creating new ${nodetype} with label ${container_name}!"
     docker-compose -f ${compose_file} run -d -p "${new_port}:${base_port}" --name ${container_name} ${nodetype}
 
+}
+
+erun() { echo "### $*" ; "$@" ; }
+
+function dockerPrune() {
+    erun docker container prune -f
+    erun docker volume prune -f
+    erun docker builder prune -f
+}
+
+function dockerCommandAll() {
+    command=$1
+    active_lst=$(docker ps | grep ${COMPOSE_PROJECT_NAME} | sed 's/|/ /' | awk '{print $1}')
+    if [[ -n ${active_lst} ]]; then
+        printf "Running '${command}' for all Containers:\n\n%s\n\n" "$(docker container ${command} ${active_lst})"
+    fi
+}
+
+function dockerStop() {
+    dockerCommandAll stop
+}
+
+function dockerStart() {
+    dockerCommandAll start
+}
+
+function dockerRestart() {
+    dockerCommandAll restart
+}
+
+function dockerDown() {
+    dockerStop
+    dockerPrune
 }
 
 function dockerPS() {

@@ -24,24 +24,32 @@ endif
 
 STE = bash sourceThenExec.sh
 # runs everything important with make
-start: down build up
+start: build down up
 
-# safe commands for whole network
-down: down-vanilla down-extras down-volumes down-cache
-stop: stop-extras stop-base
-restart: restart-extras restart-base
-
-# cleaning tools
-down-volumes:
-	# remove volumes
+clean:
 	@docker volume prune -f
-down-cache:
-	# prune cache
 	@docker builder prune -f
 
 # save build images to file
 save:
 	./scripts/image-saves.sh
+
+#######################################################################################################################
+### SHARED FUNCTIONS
+#######################################################################################################################
+
+%.build:
+	@$(STE) dockerBuild $^
+%.up:
+	@$(STE) dockerUp $^
+%.down:
+	@$(STE) dockerDown $^
+%.run:
+	@$(STE) dockerRun $^
+%.remove:
+	@$(STE) dockerRemove $^
+%.ps:
+	@docker-compose -f $^ ps
 
 #######################################################################################################################
 ### BUILD IMAGES
@@ -53,13 +61,6 @@ spark.build : spark
 hive.build : hive
 pig.build : pig
 
-%.build:
-	@$(STE) dockerBuild $^
-%.up:
-	@$(STE) dockerUp $^
-%.run:
-	@$(STE) dockerRun $^
-
 
 #######################################################################################################################
 ### VANILLA NODES
@@ -67,43 +68,25 @@ pig.build : pig
 
 # commands for namenode
 
-up: | namenode.up managers.up
+up: | namenode.up datanode-scaled managers.up
+down: | managers.down datanode-down namenode.down clean
+
 namenode.up: hadoop/compose/docker-compose-name.yml
-managers.up: hadoop/compose/docker-compose-managers.yml
+namenode.down: hadoop/compose/docker-compose-name.yml
+namenode.ps: hadoop/compose/docker-compose-name.yml
 
-stop-name:
-	@docker-compose -f base/compose/docker-compose-name.yml stop
-restart-name:
-	@docker-compose -f base/compose/docker-compose-name.yml restart
-down-name:
-	@docker-compose -f hadoop/compose/docker-compose-name.yml down
-
-
-datanode.scaled:
+datanode-scaled:
 	@$(STE) dockerScale datanode hadoop/compose/docker-compose-data.yml 9864
-stop-data:
-	@docker-compose -f base/compose/docker-compose-data.yml stop
-restart-data:
-	@docker-compose -f base/compose/docker-compose-data.yml restart
-down-data:
-	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-data.yml down
+datanode-down:
+	#@$(STE) dockerScaleDown datanode 0
 
-# commands for managers
-up-managers:
-	# start resourcemanager, nodemanager and history server
-	@docker-compose -f base/compose/docker-compose-managers.yml up ${BUILD_FLAG} -d
-stop-managers:
-	@docker-compose -f base/compose/docker-compose-managers.yml stop
-restart-managers:
-	@docker-compose -f base/compose/docker-compose-managers.yml restart
-down-managers:
-	@docker-compose --log-level=CRITICAL  -f base/compose/docker-compose-managers.yml down
+managers.up: hadoop/compose/docker-compose-managers.yml
+managers.down: hadoop/compose/docker-compose-managers.yml
+managers.ps: hadoop/compose/docker-compose-managers.yml
 
-# commands for vanilla tools
-up-vanilla: up-name up-data up-managers
-down-vanilla: down-managers down-data down-name
-stop-vanilla: stop-managers stop-data stop-name
-restart-vanilla: restart-managers restart-data restart-name
+hadoop-ps:
+	@docker-compose -f hadoop/compose/docker-compose-name.yml ps
+	@docker ps -q
 
 #######################################################################################################################
 ### ADDITIONAL TOOLS
@@ -136,12 +119,6 @@ stop-spark:
 	@docker-compose -f extras/spark/docker-compose.yml stop
 restart-spark:
 	@docker-compose -f extras/spark/docker-compose.yml stop
-
-# grouped commands for extra tools
-up-extras: up-hive up-pig
-down-extras: down-pig down-hive
-stop-extras: stop-pig stop-hive
-restart-extras: restart-pig restart-hive
 
 #######################################################################################################################
 ### EXAMPLES

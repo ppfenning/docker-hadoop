@@ -27,32 +27,66 @@ function dockerBuild() {
 
 function dockerUp() {
     compose_file=$1
-    docker-compose -f ${compose_file} up ${BUILD_FLAG} --no-recreate -d
+    docker-compose -f ${compose_file} up ${BUILD_FLAG} -d
+}
+
+function dockerDown() {
+    compose_file=$1
+    docker-compose -f ${compose_file} rm -sfv
 }
 
 function dockerRun() {
 
     local nodetype=$1
     local compose_file=$2
-    local port=$3
+    local base_port=$3
+    local new_port=$4
+    local container_name=$5
 
-    echo "Creating new ${nodetype}!"
-    docker-compose -f ${compose_file} run -d -p ${port} ${nodetype}
+    echo "###########################################################################################################"
+    echo "### Creating new ${nodetype} with label ${container_name}!"
+    docker-compose -f ${compose_file} run -d -p "${new_port}:${base_port}" --name ${container_name} ${nodetype}
 
 }
 
+function dockerPS() {
+    local nodetype=$1
+    local flags=$2
+    docker ps | grep ${flags} "${nodetype}"
+}
+
 function dockerRemove() {
-
-    local compose_file=$1
-    local container_name=$2
-    echo "Destroying ${nodetype} with label ${container_name}!"
-    docker rm -fv ${container_name}
-
+    local container_name=$1
+    echo "###########################################################################################################"
+    echo "### Destroying container $(docker rm -fv ${container_name})"
 }
 
 function findWorkers() {
     local nodetype=$1
-    docker ps | grep -c "${nodetype}"
+    dockerPS ${nodetype} "-c"
+}
+
+function getContainerName() {
+    local nodetype=$1
+    local nodeid=$2
+    echo ${COMPOSE_PROJECT_NAME}-${nodetype}-${nodeid}
+}
+
+function getNewPort() {
+    local start_port=$1
+    local nodeid=$2
+    echo $(( start_port + nodeid - 1 ))
+}
+
+function dockerScaleDownAll() {
+    local nodetype=$1
+    local last_kill=${workers:-1}
+
+    running="$( findWorkers $nodetype )"
+
+    for i in $( eval echo {$running..$last_kill} | sort -r ); do
+        dockerRemove "$(getContainerName ${nodetype} ${i})"
+    done
 }
 
 function dockerScale() {
@@ -61,32 +95,37 @@ function dockerScale() {
     local compose_file=$2
     local port=$3
 
-    function dockerScaleUp() {
+    function dockerScaleAdd() {
         (( running ++ ))
         for i in $( eval echo {$running..$WORKERS} ); do
-            (( port++ ))
-            dockerRun ${nodetype} ${compose_file} $port
+            dockerRun ${nodetype} ${compose_file} ${port} "$(getNewPort ${port} ${i} )" "$(getContainerName ${nodetype} ${i})"
         done
     }
 
-    function dockerScaleDown() {
-        for i in $( eval echo {$running..$WORKERS} ); do
-            (( port++ ))
-            dockerRun ${nodetype} ${compose_file} $port
+    function dockerScaleSub() {
+        last_kill=$(( WORKERS + 1 ))
+        for i in $( eval echo {$running..$last_kill} | sort -r ); do
+            dockerRemove "$(getContainerName ${nodetype} ${i})"
         done
     }
 
     running="$( findWorkers $nodetype )"
     if [[ running -eq 0 ]]; then
-        echo 1
         dockerUp ${compose_file}
     fi
-    if (( running > WORKERS )); then
-        dockerScaleDown
+
+    if (( WORKERS > 6 )); then
+        echo "#############################################################################################################"
+        echo "### ERROR: The chosen worker count of ${WORKERS} exceeds the maximum of 6!"
+    elif (( running > WORKERS )); then
+        dockerScaleSub
     elif (( running < WORKERS )); then
-        dockerScaleUp
+        dockerScaleAdd
     fi
 
-    docker ps | grep ${nodetype}
+    echo "#############################################################################################################"
+    echo "### Nodetype '${nodetype}' has $(findWorkers ${nodetype}) worker(s) [MAXIMUM 6]"
+    echo "#############################################################################################################"
 
 }
+

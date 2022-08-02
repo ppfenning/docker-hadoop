@@ -10,8 +10,13 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
 
   namenode:
-    build: ..
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ..
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     container_name: namenode
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9870/"]

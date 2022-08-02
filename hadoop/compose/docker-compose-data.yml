@@ -3,8 +3,13 @@ version: "3.8"
 services:
 
   datanode:
-    build: ..
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ..
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9864/" ]
       timeout: 45s

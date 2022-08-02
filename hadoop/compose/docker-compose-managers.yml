@@ -3,8 +3,13 @@ version: "3.8"
 services:
   
   resourcemanager:
-    build: ..
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ..
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     container_name: resourcemanager
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8088/" ]
@@ -27,8 +32,13 @@ services:
   nodemanager:
     depends_on:
       - resourcemanager
-    build: ..
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ..
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     container_name: nodemanager
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8042/" ]
@@ -51,8 +61,13 @@ services:
   historyserver:
     depends_on:
       - resourcemanager
-    build: ..
-    image: "${IMAGE_FAMILY}-hadoop:${TAG}"
+    build:
+      context: ..
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-${BACKEND}:${TAG}"
     container_name: historyserver
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8188/" ]

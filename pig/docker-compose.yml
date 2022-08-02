@@ -3,11 +3,22 @@ version: "3.8"
 services:
 
   pignode:
-    build: .
-    image: "${IMAGE_FAMILY}-pig:${TAG}"
+    build:
+      context: .
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-pig-${BACKEND}:${TAG}"
     container_name: pignode
+    expose:
+      - 7777
+    ports:
+      - "7777:7777"
     environment:
-      SERVICE_PRECONDITION: "hive-server:9870"
+      SERVICE_PRECONDITION: "namenode:9870"
     env_file:
-      - ../../env_files/hadoop.env
-      - ../../env_files/hive.env
+      - ../env_files/hadoop.env
+      - ../env_files/hive.env
+    command:
+      - ./startup/start-pig-local.sh

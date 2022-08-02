@@ -2,9 +2,10 @@
 ### PIG IMAGE
 ##########################################################################################
 
-ARG IMAGE_FAMILY=ppfenning/final-project
-ARG TAG=latest
-FROM ${IMAGE_FAMILY}-hive:${TAG}
+ARG IMAGE_FAMILY=ppfenning/docker
+ARG BACKEND=hadoop
+ARG TAG=master
+FROM ${IMAGE_FAMILY}-${BACKEND}:${TAG}
 
 MAINTAINER Patrick Pfenning <pfenningp@wit.edu>
 
@@ -32,6 +33,10 @@ ENV PIG_URL=$BASE_URL/pig/pig-$PIG_VERSION/pig-$PIG_VERSION.tar.gz
 # installers
 ADD installers/ /installers/
 RUN chmod a+x /installers/*
+
+# startup
+ADD startup/ /startup/
+RUN chmod a+x /startup/*
 
 ##########################################################################################
 ### PIG

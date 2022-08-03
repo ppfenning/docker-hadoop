@@ -25,10 +25,10 @@
 <br />
 <div align="center">
   <a href="https://github.com/ppfenning/docker-hadoop">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="media/hadoop.jpg" alt="Logo" width="200">
   </a>
 
-<h3 align="center">Docker Hadoop</h3>
+<h1 align="center">Docker Hadoop</h3>
 
   <p align="center">
     A "stackable" Hadoop network with simple setup and teardown!
@@ -45,46 +45,51 @@
 </div>
 
 
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">Background</a>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
-
-
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Docker Hadoop][product-screenshot]](https://github.com/ppfenning/docker-hadoop/media/intro/screen-shot.png)
+[![Docker Hadoop][product-screenshot]](https://example.com)
 
-There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+Hadoop is a distributed computing solution developed in 2002 by the [Apache Software Foundation](https://apache.org/). 
+Hadoop relies on nodes of a cluster to distribute data via a Map-Reduce structure. The main components of Hadoop are:
 
-Here's why:
-* Your time should be focused on creating something amazing. A project that solves a problem and helps others
-* You shouldn't be doing the same tasks over and over like creating a README from scratch
-* You should implement DRY principles to the rest of your life :smile:
+* __Namenode:__ The _master_ node which splits tasks to other nodes.
 
-Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+* __Datanode(s):__ A _slaves_ to the __namenode__, to carry out computation
 
-Use the `BLANK_README.md` to get started.
+* __Hadoop Distributed File System _(HDFS)_:__ A file system which is accessible by all nodes in the system. 
+
+* __Yet Another Resource Manager _(YARN)_:__ Manages resources and scheduling for the network
+
+Additionally, there exist many supplementary software solutions for Hadoop ([Look Here](https://dlcdn.apache.org)), but we will be focusing on the following:
+
+* __Spark:__ A multi language solution which can sit on top of __Hadoop,__ or replace it entirely. Mainly used as a _Scala_ or _Python_ tool.
+* __Hive:__ A _JDBC_ data warehouse solution which allows the user to query data in __HDFS__ using _SQL._
+* __Pig:__ Simple shell for performing map-reduce problems on HDFS or locally.
+
+## Proposal
+
+### Problem
+
+>Hadoop can be distributed over either a physical or virtual cluster, but most commonly requires the use of __SSH__ to transfer data between nodes.
+This requires setup on each node and is often semi-automated or completely manual. The system has a defined set of _home_ nodes across the cluster.
+This is a delicate task, which can take many man-hours to complete.
+
+### __Solution:__ 
+
+> Employ Docker to **containerize** this process.
+
+### Why Docker?
+
+Docker utilizes __images__ which can be deployed on almost any OS. It utilizes layers to parse out instructions to each container. Instructions
+are loaded into the __image__ at the build step, allowing only the software which is necessary to the system. When the __image__ is deployed it follows 
+the stored recipe, allowing for simple configuration without the fear of dependency issues. These configured __containers__ can be stopped and started 
+with a simple command `docker up` or `docker down`. Because each node in our system requires __Hadoop__ to be installed, can reuse a set __hadoop__ image, with differing startup commands. 
+
+Docker Compose simplifies this process even further, by allowing for _yaml_ based configuration of multiple nodes at once. Additionally all deployed nodes are placed within a subnet created at
+runtime. This means each node can "see" each other within the `localhost` and thus can give instructions without the use of SSH. Composing creates a __stack__ 
+which can be monitored and managed via a single interface. Nodes can be scaled up or down depending on user needs. Because it is virtualized, there is no need to fear 
+breaking the network, as it can be rebuilt simply on the stack.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -118,24 +123,43 @@ This is an example of how to list things you need to use the software and how to
    ```sh
    cd docker-hadoop
    ```
-3. Deploy the network
-   ```
-   # local
-   make
-   
-   # from dockerhub
-   make LOCAL=0
-   ```
+
+## Images:
+
+1. [Docker Hadoop](https://hub.docker.com/repository/docker/ppfenning/docker-hadoop): The base image which other images are build from. This image uses
+the latest release of __Ubuntu.__ and only installs Java 8 and Hadoop 3.3.3. It should be noted that all software versions can be changed via configuration files.
+1. [Docker Pig](https://hub.docker.com/repository/docker/ppfenning/docker-hadoop-pig): Installs Pig 0.17.0
+2. [Docker Hive](https://hub.docker.com/repository/docker/ppfenning/docker-hadoop-hive): Installs Hive 3.1.3.
+
+## Containers:
+
+1. __Namenode:__ First node to start. Prerequisite for any other node type. Uses `docker-hadoop`.
+1. __Datanode:__ Slave to __namenode__. Intended to be scaled up or down based on workload. Uses `docker-hadoop`.
+2. __Resource Manager:__ _YARN_ node which tracks tasks from __namenode.__ Uses `docker-hadoop`.
+2. __Node Manager:__ _YARN_ node which tracks activity and heartbeat of all other nodes. Uses `docker-hadoop`.
+2. __Pignode:__ Single node which sits atop of HDFS. Add-on to __namenode.__ Access to `grunt` shell. Uses `docker-hadoop-pig`.
+2. __Hivenode:__ Single node which sits atop of HDFS. Add-on to __namenode.__ Access to `beehive` shell. Uses `docker-hadoop-hive`.
+
+## Deployment:
+
+Go to the repo directory
+
+1. Initialize:
+    - Build local images from scratch: `make`
+    - Pull from prebuild images: `make LOCAL=0`
 > **_NOTE:_**  This command will build all necessary images and bring the network online
 
+![img.png](media/make.png)
+
+2. Scale Datanodes: `make datanode-scaled WORKERS={DESIRED NODE COUNT}`
+
+![img.png](media/scale.png)
+
+### Entrypoints:
+
 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 
 <!-- TODO -->
 ## Roadmap
@@ -216,7 +240,7 @@ Use this space to list resources you find helpful and would like to give credit 
 
 * [Big Data Europe Repo](https://github.com/big-data-europe/docker-hadoop)
 > This project was forked from Big Data Europe's repo. I couldn't have completed this without the base
-* [The Apache Sortware Foundation](https://apache.org/)
+* [The Apache Software Foundation](https://apache.org/)
 > [Hadoop](https://hadoop.apache.org/), [Spark](https://spark.apache.org/), [Pig](https://pig.apache.org/) and [Hive](https://hive.apache.org/) are all open source Apache solutions!
 * [Docker Cheatsheet](https://dockerlabs.collabnix.com/docker/cheatsheet/)
 > I learned a ton about docker in this project...
@@ -244,7 +268,7 @@ Use this space to list resources you find helpful and would like to give credit 
 [license-url]: https://github.com/ppfenning/docker-hadoop/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/patrick-pfenning
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: media/intro/screen-shot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB

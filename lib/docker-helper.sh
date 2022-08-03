@@ -12,7 +12,11 @@ function dockerPush() {
 
 function dockerBuild() {
     local image_dir=$1
-    local image_name="${IMAGE_FAMILY}-${image_dir}:${TAG}"
+    local image_name="${IMAGE_FAMILY}-${image_dir}"
+    if [ "${image_dir}" == 'pig' ] || [ "${image_dir}" == 'hive' ]; then
+        image_name="${image_name}-${BACKEND}"
+    fi
+    image_name="${image_name}:${TAG}"
     VERSION_ARGS=$(buildArg "./versions/${ENV}.versions")
     docker build ${CACHED_FLAG} --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} \
             --build-arg TAG=${TAG} \

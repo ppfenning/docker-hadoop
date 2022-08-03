@@ -25,7 +25,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/ppfenning/docker-hadoop">
-    <img src="media/hadoop.jpeg" alt="Hadoop" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Best-README-Template</h3>
@@ -76,11 +76,30 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Docker Hadoop][product-screenshot]](https://example.com)
+[![Docker Hadoop][product-screenshot]](https://github.com/ppfenning/docker-hadoop/media/intro/screen-shot.png)
 
-> **GOAL:** Create a multihomed Hadoop solution over a self-contained subnetwork.
+There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
+
+Here's why:
+* Your time should be focused on creating something amazing. A project that solves a problem and helps others
+* You shouldn't be doing the same tasks over and over like creating a README from scratch
+* You should implement DRY principles to the rest of your life :smile:
+
+Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
+
+Use the `BLANK_README.md` to get started.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
@@ -125,7 +144,7 @@ This is an example of how to list things you need to use the software and how to
 
 
 <!-- TODO -->
-## TODO
+## Roadmap
 
 - [X] Hadoop single namenode
 - [x] Namenode with single datanode
@@ -148,6 +167,7 @@ This is an example of how to list things you need to use the software and how to
 See the [open issues](https://github.com/ppfenning/docker-hadoop/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
 
 
 <!-- CONTRIBUTING -->
@@ -230,7 +250,7 @@ Use this space to list resources you find helpful and would like to give credit 
 [license-url]: https://github.com/ppfenning/docker-hadoop/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/patrick-pfenning
-[product-screenshot]: /media/intro/screen-shot.png
+[product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
 [Next-url]: https://nextjs.org/
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB

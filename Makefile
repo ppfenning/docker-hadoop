@@ -3,6 +3,7 @@ export
 
 TAG = $(shell git rev-parse --abbrev-ref HEAD)
 LOCAL = 1
+BACKEND = hadoop
 ifeq ($(LOCAL),1)
 	ACCOUNT_NAME = localhost:5000
 endif

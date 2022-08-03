@@ -1,14 +1,14 @@
 include .env
 export
 
-ifneq ($(RELEASE),1)
+TAG = $(shell git rev-parse --abbrev-ref HEAD)
+LOCAL = 1
+ifeq ($(LOCAL),1)
 	ACCOUNT_NAME = localhost:5000
 endif
-
-TAG := $(shell git rev-parse --abbrev-ref HEAD)
-DOCKER_NETWORK := ${COMPOSE_PROJECT_NAME}_default
-IMAGE_FAMILY := ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
-COMPOSE_PREFIX := ${BACKEND}/compose/docker-compose
+DOCKER_NETWORK = ${COMPOSE_PROJECT_NAME}_default
+IMAGE_FAMILY = ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
+COMPOSE_PREFIX = ${BACKEND}/compose/docker-compose
 
 $(shell chmod +x scripts/* lib/*)
 
@@ -28,6 +28,7 @@ save:
 #######################################################################################################################
 ### SHARED FUNCTIONS
 #######################################################################################################################
+
 
 %.build:
 	@$(STE) dockerBuild $^
@@ -77,8 +78,8 @@ managers.up: ${COMPOSE_PREFIX}-managers.yml
 ### ADDITIONAL TOOLS
 #######################################################################################################################
 
-pig.up: pig/docker-compose.yml
-hive.up: hive/docker-compose.yml
+pig.up: pig/docker-compose.yml | namenode.up
+hive.up: hive/docker-compose.yml | namenode.up
 
 #######################################################################################################################
 ### EXAMPLES
@@ -93,3 +94,13 @@ wordcount.example: wordcount examples/wordcount/docker-compose.yml
 
 %.example:
 	@./scripts/run-example.sh $^
+
+hdfs:
+	docker-compose exec namenode $@ ${cmd}
+
+namenode.term: | namenode.up
+	docker-compose exec namenode bash
+pignode.term: | pig.up
+	docker-compose exec pignode /startup/start-pig-local.sh
+hivenode.term: | hive.up
+	docker-compose exec -u workerbee hivenode /startup/start-beeline.sh

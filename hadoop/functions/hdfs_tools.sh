@@ -16,14 +16,13 @@ function addCSVDataHadoop() {
 
     local datafile=$1
     fname="$(basename "${datafile}" | cut -d'.' -f1).csv"
-
     # check if file on hdfs
-    hdfs dfs -test -f "/data/${fname}";
+    hdfs dfs -test -e "/data/${fname}";
     # if no, load it
     if [ $? -eq 1 ]; then
         mkdirHadoop /data/
-        unzip "${datafile}" -d /data/
         hdfs dfs -put -f "/data/${fname}" /data/
     fi
     hadoop fs -cat "/data/${fname}" | head
+
 }

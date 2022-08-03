@@ -19,6 +19,5 @@ services:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ../env_files/hadoop.env
-      - ../env_files/hive.env
     command:
       - ./startup/start-pig-local.sh

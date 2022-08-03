@@ -20,7 +20,7 @@ function dockerBuild() {
             ${VERSION_ARGS} \
            -t ${image_name} \
            ./${image_dir}
-    if [ "${RELEASE}" == "1" ]; then
+    if [ "${RELEASE}" == "1" ] && [ "${LOCAL}" == "0" ] ; then
         dockerPush ${image_name}
     fi
 }
@@ -54,9 +54,9 @@ function dockerPrune() {
 
 function dockerCommandAll() {
     command=$1
-    active_lst=$(docker ps | grep ${COMPOSE_PROJECT_NAME} | sed 's/|/ /' | awk '{print $1}')
+    active_lst=$(docker ps | grep ${IMAGE_FAMILY} | sed 's/|/ /' | awk '{print $1}')
     if [[ -n ${active_lst} ]]; then
-        printf "Running '${command}' for all Containers:\n\n%s\n\n" "$(docker container ${command} ${active_lst})"
+        printf "Running '${command}' for all Containers:\n\n%s\n\n" "$(docker container "${command}" ${active_lst})"
     fi
 }
 

@@ -24,6 +24,12 @@ ifeq ($(LOCAL),1)
 	ACCOUNT_NAME = localhost:5000
 endif
 
+# flags for building docker containers
+ifeq ($(CACHED),0)
+	BUILD_FLAG := --build
+	CACHED_FLAG := --no-cache
+endif
+
 # name of network compose uses
 DOCKER_NETWORK = ${COMPOSE_PROJECT_NAME}_default
 # all images have the same tag prefix
@@ -33,16 +39,12 @@ IMAGE_FAMILY = ${ACCOUNT_NAME}/${COMPOSE_PROJECT_NAME}
 # may fully parameterize compose and/or build single compose for build with make
 # this would make docker-compose down much simpler
 COMPOSE_PREFIX = ${BACKEND}/compose/docker-compose
-# make scripts and library executable
-# flags for building docker containers
-ifeq ($(CACHED),0)
-	BUILD_FLAG := --build
-	CACHED_FLAG := --no-cache
-endif
 
 #######################################################################################################################
 ### SOURCE FUNCTIONS
 #######################################################################################################################
+
+# make shell functions executable
 $(shell chmod +x scripts/* lib/*)
 # sources files to allow function use
 STE = bash sourceThenExec.sh

@@ -1,66 +1,270 @@
-# Hadoop Docker
+<div id="top"></div>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-## Clone this repo with the below command
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-`git clone https://github.com/docker-hadoop.git`
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/ppfenning/docker-hadoop">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-## Supported Hadoop Versions
-See repository branches for supported hadoop versions (using 3.2.3)
+<h3 align="center">Best-README-Template</h3>
 
-## Pre-requisites
+  <p align="center">
+    An awesome README template to jumpstart your projects!
+    <br />
+    <a href="https://github.com/ppfenning/docker-hadoop"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/ppfenning/docker-hadoop">View Demo</a>
+    ·
+    <a href="https://github.com/ppfenning/docker-hadoop/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/ppfenning/docker-hadoop/issues">Request Feature</a>
+  </p>
+</div>
 
-Git: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-
-Docker: https://docs.docker.com/engine/install/
 
 
-## Quick Start
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
+  </ol>
+</details>
 
-To deploy an example HDFS cluster, run:
-```
-  docker-compose up 
-  # docker-compose up -d (if background run is desired)
-```
 
-Run example wordcount job:
-```
-  make wordcount
-```
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-`docker-compose` creates a docker network that can be found by running `docker network list`, e.g. `dockerhadoop_default`.
+[![Docker Hadoop][product-screenshot]](https://github.com/ppfenning/docker-hadoop/media/intro/screen-shot.png)
 
-Run `docker network inspect` on the network (e.g. `dockerhadoop_default`) to find the IP the hadoop interfaces are published on. Access these interfaces with the following URLs:
+There are many great README templates available on GitHub; however, I didn't find one that really suited my needs so I created this enhanced one. I want to create a README template so amazing that it'll be the last one you ever need -- I think this is it.
 
-* Namenode: http://<dockerhadoop_IP_address>:9870/dfshealth.html#tab-overview
-* History server: http://<dockerhadoop_IP_address>:8188/applicationhistory
-* Datanode(s): http://<dockerhadoop_IP_address>:$DATA_PORT/
-* Nodemanager: http://<dockerhadoop_IP_address>:8042/node
-* Resource manager: http://<dockerhadoop_IP_address>:8088/
+Here's why:
+* Your time should be focused on creating something amazing. A project that solves a problem and helps others
+* You shouldn't be doing the same tasks over and over like creating a README from scratch
+* You should implement DRY principles to the rest of your life :smile:
 
-## Configure Environment Variables
+Of course, no one template will serve all projects since your needs may be different. So I'll be adding more in the near future. You may also suggest changes by forking this repo and creating a pull request or opening an issue. Thanks to all the people have contributed to expanding this template!
 
-The configuration parameters can be specified in the hadoop.env file or as environmental variables for specific services (e.g. namenode, datanode etc.):
-```
-  CORE_CONF_fs_defaultFS=hdfs://namenode:8020
-```
+Use the `BLANK_README.md` to get started.
 
-CORE_CONF corresponds to core-site.xml. fs_defaultFS=hdfs://namenode:8020 will be transformed into:
-```
-  <property><name>fs.defaultFS</name><value>hdfs://namenode:8020</value></property>
-```
-To define dash inside a configuration parameter, use triple underscore, such as YARN_CONF_yarn_log___aggregation___enable=true (yarn-site.xml):
-```
-  <property><name>yarn.log-aggregation-enable</name><value>true</value></property>
-```
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-The available configurations are:
-* /etc/hadoop/core-site.xml CORE_CONF
-* /etc/hadoop/hdfs-site.xml HDFS_CONF
-* /etc/hadoop/yarn-site.xml YARN_CONF
-* /etc/hadoop/httpfs-site.xml HTTPFS_CONF
-* /etc/hadoop/kms-site.xml KMS_CONF
-* /etc/hadoop/mapred-site.xml  MAPRED_CONF
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-If you need to extend some other configuration file, refer to base/entrypoint.sh bash script.
 
-### Note: This has been forked from Big Data Europe's docker image. Thank you to all contributors!
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+This is an example of how you may give instructions on setting up your project locally.
+To get a local copy up and running follow these simple example steps.
+
+### Prerequisites
+
+This is an example of how to list things you need to use the software and how to install them.
+
+* [docker-compose](https://docs.docker.com/compose/install/) _or with_ `pip install docker-compose`
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+* [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) 
+
+#### Helpful (but not needed) tools
+
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+* [Portainer](https://www.portainer.io/install-BE-now)
+
+### Installation
+
+1. Clone the repo
+   ```sh
+   git clone https://github.com/ppfenning/docker-hadoop.git
+   ```
+2. Change directories to the install repo
+   ```sh
+   cd docker-hadoop
+   ```
+3. Deploy the network
+   ```
+   # local
+   make
+   
+   # from dockerhub
+   make LOCAL=0
+   ```
+> **_NOTE:_**  This command will build all necessary images and bring the network online
+
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- TODO -->
+## Roadmap
+
+- [X] Hadoop single namenode
+- [x] Namenode with single datanode
+- [x] Namenode with 2 datanodes
+- [x] Namenode with _N_ datanodes __(max 6)__
+- [x] Resource and Node managers
+- [x] History server
+- [x] Pig terminal node
+- [x] Hive terminal node
+- [x] Scale datanodes dynamically
+- [X] Example Compose files to run jobs
+- [X] Terminal endpoints for
+  - [X] Hadoop
+  - [X] Pig
+  - [X] Hive
+  - [ ] Spark
+- [ ] Build with spark backend
+- [ ] Create CLI rather than just Makefile
+
+See the [open issues](https://github.com/ppfenning/docker-hadoop/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+License
+=======
+    Copyright 2022 Patrick Pfenning
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+## Contact
+
+- Patrick Pfenning - Data Science Master's candidate at Wentworth - ppfenning@wit.edu
+- Github: [ppfenning](https://github.com/ppfenning)
+- Project Link: [docker-hadoop](https://github.com/ppfenning/docker-hadoop)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+
+* [Big Data Europe Repo](https://github.com/big-data-europe/docker-hadoop)
+> This project was forked from Big Data Europe's repo. I couldn't have completed this without the base
+* [The Apache Sortware Foundation](https://apache.org/)
+> [Hadoop](https://hadoop.apache.org/), [Spark](https://spark.apache.org/), [Pig](https://pig.apache.org/) and [Hive](https://hive.apache.org/) are all open source Apache solutions!
+* [Docker Cheatsheet](https://dockerlabs.collabnix.com/docker/cheatsheet/)
+> I learned a ton about docker in this project...
+* [phoenixNAP](https://phoenixnap.com/kb/)
+> Helped a ton with property setup
+* [Makefile Tutorial](https://makefiletutorial.com/)
+* [Salem Othman](https://wit.edu/salem-othman) 
+> My professor for Big Data Systems
+
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/ppfenning/docker-hadoop.svg?style=for-the-badge
+[contributors-url]: https://github.com/ppfenning/docker-hadoop/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ppfenning/docker-hadoop.svg?style=for-the-badge
+[forks-url]: https://github.com/ppfenning/docker-hadoop/network/members
+[stars-shield]: https://img.shields.io/github/stars/ppfenning/docker-hadoop.svg?style=for-the-badge
+[stars-url]: https://github.com/ppfenning/docker-hadoop/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ppfenning/docker-hadoop.svg?style=for-the-badge
+[issues-url]: https://github.com/ppfenning/docker-hadoop/issues
+[license-shield]: https://img.shields.io/github/license/ppfenning/docker-hadoop.svg?style=for-the-badge
+[license-url]: https://github.com/ppfenning/docker-hadoop/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://linkedin.com/in/patrick-pfenning
+[product-screenshot]: images/screenshot.png
+[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[Next-url]: https://nextjs.org/
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
+[Vue-url]: https://vuejs.org/
+[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
+[Angular-url]: https://angular.io/
+[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
+[Svelte-url]: https://svelte.dev/
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[Bootstrap-url]: https://getbootstrap.com
+[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
+[JQuery-url]: https://jquery.com 
+[repo-url]: https://github.com/ppfenning/docker-hadoop

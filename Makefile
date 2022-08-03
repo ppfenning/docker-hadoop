@@ -58,13 +58,6 @@ STE = bash sourceThenExec.sh
 init: build down up
 
 #######################################################################################################################
-### IMAGE TOOLS
-#######################################################################################################################
-# save build images to file
-save:
-	./scripts/image-saves.sh
-
-#######################################################################################################################
 ### BUILD IMAGES
 #######################################################################################################################
 
@@ -152,11 +145,11 @@ wordcount.example: wordcount examples/wordcount/docker-compose.yml
 #######################################################################################################################
 
 # open bash terminal on namenode
-namenode-term: | namenode.up
+namenode-term:
 	docker-compose exec namenode bash
 
 # opens grunt terminal
-%.pignode.term: | pig.up
+%.pignode.term:
 	docker-compose exec pignode /startup/start-pig-$^.sh
 # PHONY keys for pig terminals
 .PHONY: local mapreduce
@@ -168,5 +161,5 @@ pignode-term: local.pignode.term
 mapreduce.pignode.term: mapreduce
 
 # open beehive terminal with workerbee user
-hivenode-term: | hive.up
+hivenode-term:
 	docker-compose exec -u workerbee hivenode /startup/start-beeline.sh

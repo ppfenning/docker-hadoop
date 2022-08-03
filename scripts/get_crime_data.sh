@@ -3,7 +3,7 @@
 mkdir -p examples/data
 cd examples/data || exit 1
 
-if [ ! -f Chicago_Crimes.zip ]; then
+if [ ! -f Chicago_Crimes.csv ]; then
     echo "================================================================================================================="
     echo "Get data from kaggle..."
     echo "================================================================================================================="
@@ -29,10 +29,7 @@ if [ ! -f Chicago_Crimes.zip ]; then
     echo "Verify word count for cleaned data..."
     wc -l Chicago_Crimes.csv
     echo "================================================================================================================="
-    echo "Zipping single csv..."
-    zip Chicago_Crimes.zip Chicago_Crimes.csv
-    echo "================================================================================================================="
     echo "Removing unwanted data..."
-    rm ./*.csv ./*.out crimes-in-chicago.zip
+    rm ./Chicago_Crimes_2*.csv ./*.out crimes-in-chicago.zip
     echo "================================================================================================================="
 fi

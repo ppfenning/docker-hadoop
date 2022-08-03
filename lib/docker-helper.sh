@@ -5,8 +5,6 @@ function buildArg() {
     awk '{ sub ("\\\\$", " "); printf " --build-arg %s", $0  } END { print ""  }' "${arg_file}"
 }
 
-VERSION_ARGS=$(buildArg ./config/versions.env)
-
 function dockerPush() {
     local image_name=$1
     docker push ${image_name}
@@ -15,6 +13,8 @@ function dockerPush() {
 function dockerBuild() {
     local image_dir=$1
     local image_name="${IMAGE_FAMILY}-${image_dir}:${TAG}"
+    VERSION_ARGS=$(buildArg "./versions/${ENV}.versions")
+    echo $VERSION_ARGS
     docker build ${CACHED_FLAG} --build-arg IMAGE_FAMILY=${IMAGE_FAMILY} \
             --build-arg TAG=${TAG} \
             ${VERSION_ARGS} \

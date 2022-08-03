@@ -19,6 +19,7 @@ ENV BASE_URL=${BASE_URL:-https://dlcdn.apache.org}
 # initialize hadoop params
 ARG HADOOP_VERSION
 ENV HADOOP_VERSION=${HADOOP_VERSION:-3.3.3}
+ENV HADOOP_HOME=/opt/hadoop-${HADOOP_VERSION}
 # initialize hive parameters
 ARG HIVE_VERSION
 ENV HIVE_VERSION=${HIVE_VERSION:-3.1.3}
@@ -48,32 +49,16 @@ RUN chmod a+x /startup/*
 # set ENV
 ENV HIVE_BASE=/usr/local/hive
 ENV HIVE_HOME="$HIVE_BASE/apache-hive-$HIVE_VERSION-bin"
+ENV HIVE_CONF_DIR="$HIVE_HOME/conf"
 # install
 RUN ["/installers/install-hive.sh"]
-# add config files
-ADD conf $HIVE_HOME/conf/
 # update path
 ENV PATH=$HIVE_HOME/bin/:$PATH
-ENV CLASSPATH=$HADOOP_HOME/lib/:$HIVE_HOME/lib/:$CLASSPATH
 
 ##########################################################################################
-### POSTGRES
+### CONFIGURATION
 ##########################################################################################
-
-# set ENV
-ENV POSTGRES_URL="https://jdbc.postgresql.org/download/postgresql-9.4.1212.jar"
-# install
-RUN ["/installers/install-hive-postgres.sh"]
-
-##########################################################################################
-### PORT EXPORTS
-##########################################################################################
-
 EXPOSE 10000
-EXPOSE 10002
-
-##########################################################################################
-### STARTUP COMMANDS
-##########################################################################################
-
-CMD ["/startup/start-hive.sh"]
+RUN ["/startup/start-hive-config.sh"]
+RUN useradd -rm -d /home/workerbee -s /bin/bash -g root -G sudo -u 1001 workerbee
+ENTRYPOINT ["/startup/start-hive-entrypoint.sh"]

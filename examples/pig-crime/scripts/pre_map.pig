@@ -27,35 +27,4 @@ as (
 	location:chararray
 );
 
--- Q1
-A = GROUP crimes BY primary_type;
-B = FOREACH A GENERATE group as primary_type,COUNT($1) as cnt;
-C = ORDER B BY cnt DESC;
-Q1 = LIMIT C 1;
-DUMP Q1;
-STORE Q1 INTO '/pigout/Q1' USING PigStorage (',');
-
--- Q2
-
--- Q3
-A = FILTER crimes BY (primary_type == 'HOMICIDE')
-                  AND (arrest == 'True')
-                  AND (domestic == 'True');
-B = GROUP A ALL;
-Q3 = FOREACH B GENERATE COUNT(A);
-DUMP Q3;
-STORE Q3 INTO '/pigout/Q3' USING PigStorage (',');
-
--- Q4
-
--- Q5
-
--- Q6
-
--- Q7
-
--- Q8
-
--- Q9
-
--- Q10
+STORE crimes INTO 'hdfs://namenode:9000/pig-in/crimes/' USING PigStorage (',');

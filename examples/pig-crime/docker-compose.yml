@@ -4,19 +4,18 @@ services:
 
   pig-crime:
     build:
-      context: .../../pig
+      context: ../../pig
       args:
         IMAGE_FAMILY: "${IMAGE_FAMILY}"
         BACKEND: "${BACKEND}"
         TAG: "${TAG}"
     image: "${IMAGE_FAMILY}-pig-${BACKEND}:${TAG}"
     volumes:
-      - ../data/Chicago_Crimes.zip:/data/Chicago_Crimes.zip
+      - ../data/Chicago_Crimes.csv:/data/Chicago_Crimes.csv
       - ./pig.sh:/scripts/pig.sh
-      - ./run.pig:/scripts/run.pig
+      - ./scripts/:/pig/
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
       - ../../env_files/hadoop.env
-      - ../../env_files/hive.env
     command: bash -c "chmod a+x /scripts/pig.sh && /scripts/pig.sh"

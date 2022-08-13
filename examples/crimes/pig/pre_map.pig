@@ -1,5 +1,5 @@
 -- load data
-crimes = LOAD '/data/Chicago_Crimes.csv'
+crimes = LOAD 'hdfs://namenode:9000/data/Chicago_Crimes.csv'
 using org.apache.pig.piggybank.storage.CSVExcelStorage()
 as (
 	num:int,

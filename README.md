@@ -15,20 +15,21 @@
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
+
+<!-- PROJECT LOGO -->
+<div align="center">
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/ppfenning/docker-hadoop">
+<h1  style="font-size:70px;" align="center">Docker Hadoop</h1>
+
+<a href="https://github.com/ppfenning/docker-hadoop">
     <img src="media/hadoop.jpg" alt="Logo" width="200">
   </a>
-
-<h1 align="center">Docker Hadoop</h3>
 
   <p align="center">
     A "stackable" Hadoop network with simple setup and teardown!
@@ -93,7 +94,6 @@ breaking the network, as it can be rebuilt simply on the stack.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -102,27 +102,21 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-
 * [docker-compose](https://docs.docker.com/compose/install/) _or with_ `pip install docker-compose`
 * [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 * [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) 
 
-#### Helpful (but not needed) tools
+#### Helpful (but not needed)
 
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 * [Portainer](https://www.portainer.io/install-BE-now)
 
 ### Installation
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/ppfenning/docker-hadoop.git
-   ```
-2. Change directories to the install repo
-   ```sh
-   cd docker-hadoop
-   ```
+> Clone the repo (that's it!)
+>   ```sh
+>   git clone https://github.com/ppfenning/docker-hadoop.git
+>   ```
 
 ## Images:
 
@@ -142,27 +136,33 @@ the latest release of __Ubuntu.__ and only installs Java 8 and Hadoop 3.3.3. It 
 
 ## Deployment:
 
-Go to the repo directory
+### Create
 
-1. Initialize:
+1. Change your working directory to the downloaded repo
+1. Make the network:
     - Build local images from scratch: `make`
     - Pull from prebuild images: `make LOCAL=0`
-> **_NOTE:_**  This command will build all necessary images and bring the network online
 
 ![img.png](media/make.png)
 
-2. Scale Datanodes: `make datanode-scaled WORKERS={DESIRED NODE COUNT}`
+> **_NOTE:_**  This command will build all necessary images and bring the network online. This takes a few
+> minutes  on the initial run. However, if you have a stored image this process takes only a few seconds.
+
+### Scale Datanodes
+
+- Scale Datanodes: `make datanode-scaled WORKERS={DESIRED NODE COUNT}`
 
 ![img.png](media/scale.png)
 
-### Entrypoints:
+> _**NOTE:** Because `docker-compose` builds containers in parallel, the scale option fails when port mapping is required.
+> To solve this, use `docker build` and manually assign container name and port._
 
-
+> _**BUG:** I am unsure how to supress the orphans warning on docker-compose v2+_ 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- TODO -->
-## Roadmap
+## TODO
 
 - [X] Hadoop single namenode
 - [x] Namenode with single datanode
@@ -172,20 +172,21 @@ Go to the repo directory
 - [x] History server
 - [x] Pig terminal node
 - [x] Hive terminal node
-- [x] Scale datanodes dynamically
+- [x] Scale datanodes to active network
 - [X] Example Compose files to run jobs
 - [X] Terminal endpoints for
-  - [X] Hadoop
+  - [X] Namenode
   - [X] Pig
   - [X] Hive
-  - [ ] Spark
 - [ ] Build with spark backend
 - [ ] Create CLI rather than just Makefile
+- [ ] Dynamic node scaling
+- [ ] Hive and Pig and "plug-ins" to namenode
+- [ ] Deploy to Kubernetes
 
 See the [open issues](https://github.com/ppfenning/docker-hadoop/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 
 <!-- CONTRIBUTING -->
@@ -238,8 +239,8 @@ License
 
 Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
 
-* [Big Data Europe Repo](https://github.com/big-data-europe/docker-hadoop)
-> This project was forked from Big Data Europe's repo. I couldn't have completed this without the base
+* [Big Data Europe](https://github.com/big-data-europe/docker-hadoop)
+> This project was forked from Big Data Europe's repo. I couldn't have completed this without the base!
 * [The Apache Software Foundation](https://apache.org/)
 > [Hadoop](https://hadoop.apache.org/), [Spark](https://spark.apache.org/), [Pig](https://pig.apache.org/) and [Hive](https://hive.apache.org/) are all open source Apache solutions!
 * [Docker Cheatsheet](https://dockerlabs.collabnix.com/docker/cheatsheet/)
@@ -250,9 +251,7 @@ Use this space to list resources you find helpful and would like to give credit 
 * [Salem Othman](https://wit.edu/salem-othman) 
 > My professor for Big Data Systems
 
-
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->

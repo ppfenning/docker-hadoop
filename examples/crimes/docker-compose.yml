@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+
+  hdfs-crime:
+    build:
+      context: ../../hadoop
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-pig-${BACKEND}:${TAG}"
+    volumes:
+      - ../data/Chicago_Crimes.csv:/data/Chicago_Crimes.csv
+      - ./hdfs/:/hdfs/
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ../../env_files/hadoop.env
+    command: bash -c "chmod a+x /hdfs/hdfs.sh && /hdfs/hdfs.sh"
+
+  pig-crime:
+    depends_on:
+      hdfs-crime:
+        condition: service_completed_successfully
+    build:
+      context: ../../pig
+      args:
+        IMAGE_FAMILY: "${IMAGE_FAMILY}"
+        BACKEND: "${BACKEND}"
+        TAG: "${TAG}"
+    image: "${IMAGE_FAMILY}-pig-${BACKEND}:${TAG}"
+    volumes:
+      - ./pig/:/pig/
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ../../env_files/hadoop.env
+    command: bash -c "chmod a+x /pig/pig.sh && /pig/pig.sh"

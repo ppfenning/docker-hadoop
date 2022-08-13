@@ -128,17 +128,17 @@ hive.up: hive/docker-compose.yml | namenode.up
 #######################################################################################################################
 
 # retrieve and clean Chicago_Crimes dataset from kaggle
-insert-crimes:
+get-crimes:
 	./scripts/get_crime_data.sh
 # generic examples function (namenode must be active)
 %.example: | namenode.up
 	@./scripts/run-example.sh $^
 # PHONY keys for examples
-.PHONY: wordcount pig-crime
+.PHONY: wordcount crimes
 # runs pig example
-pig-crime.example: pig-crime examples/pig-crime/docker-compose.yml | insert-crimes
+crime.example: crimes | get-crimes up
 # runs classic hdfs wordcount
-wordcount.example: wordcount examples/wordcount/docker-compose.yml
+wordcount.example: wordcount
 
 #######################################################################################################################
 ### TERMINALS

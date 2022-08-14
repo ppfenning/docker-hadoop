@@ -13,31 +13,44 @@ else
 fi
 # show stored data
 hdfs dfs -ls /pig-in/crimes
-# remove outputs
-hadoop fs -rm -r /pig-out/
-# run problems
-pig -x local -f /pig/run.pig
-
-touch pig.txt
-
+# run each problem
 for i in {1..10}
 do
-    qdir="/pig-out/Q${i}"
-    hadoop fs -test -d "${qdir}";
-    if [ $? -eq 0 ]
+    # pig output dir
+    pig_outdir="/pig-out/Q${i}"
+    # .pig file
+    pig_file="/pig/Q${i}.pig"
+    # condensed solution
+    sol_out="/homework/pig/Q${i}.csv"
+    # check if solution exists
+    hadoop fs -test -e "${sol_out}";
+    if [ $? -eq 1 ] && [ -f "${pig_file}" ]
     then
-      hadoop fs -rm "${qdir}/.pig_schema"
-      hadoop fs -getmerge "${qdir}" "./Q${i}.csv"
-      {
-        echo "====================================================="
-        echo "Q${i}"
-        echo "====================================================="
-        cat "./Q${i}.csv"
-        echo
-      } >> pig.txt
+      echo "========================================================"
+      echo "Solving Q${i}..."
+      echo "========================================================"
+      # run problems
+      pig -x local -f "${pig_file}"
+      # remove schema config
+      hadoop fs -rm "${pig_outdir}/.pig_schema"
+      # compile data to csv
+      hadoop fs -getmerge "${pig_outdir}" "./Q${i}.csv"
+      # put csv on hdfs
+      hdfs dfs -put -f "./Q${i}.csv" "${sol_out}"
+      echo "========================================================"
+      echo "Q${i} solution"
+      echo "========================================================"
+      # show solution csv
+      hdfs dfs -cat "${sol_out}"
+      echo "========================================================"
+      echo "Removing data from ${pig_outdir}"
+      echo "========================================================"
+      # remove pig output
+      hadoop fs -rm -r "${pig_outdir}"
     fi
 done
 
-hdfs dfs -put -f pig.txt /homework/
-echo
-hdfs dfs -cat /homework/pig.txt
+echo "========================================================"
+echo "Listing all solutions..."
+echo "========================================================"
+hdfs dfs -ls /homework/pig/
